@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manikandapuram Sree Dharmasastha Kshethram</title>
     
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1006/1006619.png" type="image/png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -24,7 +26,11 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+        
+        html { 
+            scroll-behavior: smooth; 
+            scroll-padding-top: 100px; 
+        }
         
         body {
             font-family: 'Poppins', sans-serif;
@@ -35,7 +41,7 @@
 
         h1, h2, h3, .logo { font-family: 'Playfair Display', serif; }
 
-        /* --- HEADER & NAV --- */
+        /* --- HEADER --- */
         header {
             background: var(--glass);
             backdrop-filter: blur(10px);
@@ -46,7 +52,8 @@
             max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); text-decoration: none; }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-decoration: none; text-transform: uppercase; }
+        
         .nav-links { list-style: none; display: flex; gap: 30px; }
         .nav-links a { text-decoration: none; color: var(--dark); font-weight: 500; transition: 0.3s; }
         .nav-links a:hover { color: var(--primary); }
@@ -64,20 +71,52 @@
         }
         .float-wa:hover { transform: scale(1.1); }
 
-        /* --- HERO --- */
+        /* --- HERO (SLIDESHOW + MOBILE FRIENDLY) --- */
         .hero {
-            position: relative; height: 75vh;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('images/banner.jpg');
-            background-size: cover; background-position: center;
-            display: flex; align-items: center; justify-content: center;
-            text-align: center; color: white; padding: 20px;
+            position: relative; height: 85vh; /* Taller for better view */
+            /* Default Image */
+            background-image: url('images/banner1.jpg');
+            background-size: cover; 
+            background-position: center;
+            
+            /* Pushes text to BOTTOM */
+            display: flex; 
+            align-items: flex-end; 
+            justify-content: center;
+            
+            text-align: center; color: white; 
+            transition: background-image 1s ease-in-out;
         }
-        .hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+
+        /* Glass Strip at Bottom */
+        .hero-overlay {
+            width: 100%;
+            /* Gradient fade from black at bottom to transparent at top */
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0)); 
+            padding: 20px 20px 60px 20px; /* Extra padding at bottom */
+        }
+
+        .hero h1 { 
+            font-size: 3.5rem; 
+            margin-bottom: 10px; 
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            color: #fff;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            color: #f1f1f1;
+            margin-bottom: 25px;
+        }
+
+        /* Hero Button (Orange) */
         .hero-btn {
             background: linear-gradient(45deg, var(--primary), #e67e22);
-            color: white; padding: 15px 40px; text-decoration: none;
+            color: white; padding: 12px 35px; text-decoration: none;
             border-radius: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px;
             box-shadow: 0 5px 15px rgba(211, 84, 0, 0.4); transition: transform 0.3s;
+            font-size: 1rem;
         }
         .hero-btn:hover { transform: translateY(-3px); }
 
@@ -103,10 +142,13 @@
             background: var(--white); border-radius: 16px; overflow: hidden;
             box-shadow: var(--shadow); text-align: center; border-bottom: 4px solid var(--gold);
         }
-        .deity-img { height: 280px; width: 100%; object-fit: cover; }
+        .deity-img { 
+            height: 280px; width: 100%; object-fit: cover; 
+            background-color: #f0f0f0; 
+        }
         .deity-info { padding: 25px; }
 
-        /* --- CHECKBOX LIST STYLE --- */
+        /* --- BOOKING FORM --- */
         .booking-box {
             max-width: 600px; margin: 0 auto; background: white;
             padding: 40px; border-radius: 20px; box-shadow: var(--shadow);
@@ -116,7 +158,6 @@
             border: 1px solid #ddd; border-radius: 10px; outline: none;
         }
         
-        /* Modern Checkbox Container */
         .checkbox-group {
             display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;
         }
@@ -129,17 +170,20 @@
         .checkbox-item input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: var(--primary); }
         .price-tag { font-weight: bold; color: var(--primary); }
 
+        /* BOTTOM BUTTON (WhatsApp Green) */
         .whatsapp-btn {
-            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--primary), #e67e22);
+            width: 100%; padding: 15px; 
+            background: var(--whatsapp); 
             color: white; border: none; border-radius: 10px; font-size: 1.1rem;
             font-weight: bold; cursor: pointer; display: flex; align-items: center;
             justify-content: center; gap: 10px; transition: transform 0.3s;
-            box-shadow: 0 5px 15px rgba(211, 84, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
         }
-        .whatsapp-btn:hover { transform: translateY(-2px); }
+        .whatsapp-btn:hover { transform: translateY(-2px); background-color: #1ebe57; }
 
-        /* --- FOOTER & MOBILE --- */
+        /* --- FOOTER & MOBILE RESPONSIVENESS --- */
         footer { background: var(--dark); color: #aaa; text-align: center; padding: 40px 20px; margin-top: 50px; }
+        
         @media (max-width: 768px) {
             .nav-links {
                 position: fixed; right: -100%; top: 70px; height: 100vh;
@@ -148,12 +192,17 @@
             }
             .nav-links.active { right: 0; }
             .menu-toggle { display: block; }
+            .contact-wrapper { grid-template-columns: 1fr; }
+            
+            /* --- MOBILE SPECIFIC ADJUSTMENTS --- */
+            .hero { height: 70vh; } /* Slightly shorter on mobile */
+            .hero h1 { font-size: 1.8rem; } /* Smaller font for title */
+            .hero p { font-size: 1rem; }    /* Smaller font for location */
+            .hero-overlay { padding-bottom: 40px; }
         }
         
-        /* Contact Section */
         .contact-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; background: var(--white); padding: 40px; border-radius: 20px; box-shadow: var(--shadow); }
         iframe { width: 100%; height: 100%; min-height: 350px; border-radius: 12px; border: none; }
-        @media (max-width: 768px) { .contact-wrapper { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -167,7 +216,7 @@
 
     <header>
         <nav>
-            <a href="#" class="logo">Manikandapuram</a>
+            <a href="#" class="logo">Manikandapuram Temple</a>
             <div class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#" onclick="toggleMenu()">Home</a></li>
@@ -178,8 +227,8 @@
         </nav>
     </header>
 
-    <section class="hero">
-        <div>
+    <section class="hero" id="heroSection">
+        <div class="hero-overlay">
             <h1>Sree Dharmasastha Kshethram</h1>
             <p>Panapuzha, Kannur</p>
             <a href="#booking" class="hero-btn"><i class="fab fa-whatsapp"></i> Book Vazhipadu</a>
@@ -206,7 +255,7 @@
             <label style="font-weight:600; display:block; margin-bottom:8px;">Star (Nakshatram)</label>
             <select id="devStar">
                 <option value="">Select Star</option>
-                </select>
+            </select>
 
             <label style="font-weight:600; display:block; margin-bottom:15px;">Select Offerings</label>
             
@@ -253,17 +302,42 @@
                 <h3><i class="far fa-clock" style="color:var(--primary)"></i> Timings</h3>
                 <p><strong>Every Saturday:</strong><br>5:30 AM - 9:30 AM<br>5:30 PM - 8:00 PM</p>
             </div>
-            <div class="map-side"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.889393164168!2d75.3400!3d12.0500!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba46d1c0b0b0b0b%3A0x0!2sPanapuzha!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin" loading="lazy"></iframe></div>
+            
+            <div class="map-side">
+               <iframe 
+                   width="100%" 
+                   height="100%" 
+                   style="border:0; border-radius:12px; min-height: 350px;" 
+                   loading="lazy" 
+                   allowfullscreen 
+                   src="https://maps.google.com/maps?q=Manikandapuram+Sree+Dharmasastha+Kshethram+Panapuzha&t=&z=13&ie=UTF8&iwloc=&output=embed">
+               </iframe>
+            </div>
         </div>
     </section>
 
     <footer><p>© 2026 Manikandapuram Kshethram | Swamiye Saranam Ayyappa</p></footer>
 
     <script>
-        // CONFIG
         const templeNumber = "919656277945"; 
 
-        // DEITIES
+        // 1. BANNER SLIDESHOW LOGIC
+        const bannerImages = [
+            "images/banner1.jpg", 
+            "images/banner2.jpg", 
+            "images/banner3.jpg"
+        ];
+        let currentBannerIndex = 0;
+        const heroSection = document.getElementById('heroSection');
+
+        function changeBanner() {
+            currentBannerIndex = (currentBannerIndex + 1) % bannerImages.length;
+            const nextImage = bannerImages[currentBannerIndex];
+            heroSection.style.backgroundImage = `url('${nextImage}')`;
+        }
+        setInterval(changeBanner, 5000); // Changes every 5 seconds
+
+        // 2. DEITIES
         const deities = [
             { name: "Sree Dharmasastha", role: "Presiding Deity", desc: "The supreme guardian, son of Hari and Hara.", img: "images/ayyappa.png" },
             { name: "Lord Ganesha", role: "Vighnaharta", desc: "The remover of obstacles.", img: "images/ganesha.png" },
@@ -284,17 +358,15 @@
                 </div>`;
         });
 
-        // STARS
+        // 3. STARS
         const stars = ["Aswathy (Ashwini)", "Bharani", "Karthika", "Rohini", "Makayiram", "Thiruvathira", "Punartham", "Pooyam", "Ayilyam", "Makam", "Pooram", "Uthram", "Atham", "Chithira", "Chothi", "Vishakham", "Anizham", "Thrikketta", "Moolam", "Pooradam", "Uthradam", "Thiruvonam", "Avittam", "Chathayam", "Poororuttathi", "Uthrattathi", "Revathi"];
         const starSelect = document.getElementById('devStar');
         stars.forEach(s => { let o = document.createElement("option"); o.text = s; o.value = s; starSelect.add(o); });
 
-        // BOOKING LOGIC (UPDATED FOR MULTIPLE SELECTIONS)
+        // 4. BOOKING LOGIC
         function sendBooking() {
             let name = document.getElementById('devName').value;
             let star = document.getElementById('devStar').value;
-            
-            // 1. Get all Checkboxes
             let checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]:checked');
             
             if(!name || !star || checkboxes.length === 0) {
@@ -302,7 +374,6 @@
                 return;
             }
 
-            // 2. Calculate Total & Build List
             let selectedItems = [];
             let totalAmount = 0;
 
@@ -312,8 +383,7 @@
                 selectedItems.push(`${box.value} (₹${price})`);
             });
 
-            // 3. Create Message
-            let itemsString = selectedItems.join('%0A🥥 '); // Join with new line + coconut icon
+            let itemsString = selectedItems.join('%0A🥥 ');
 
             let msg = `*Swamiye Saranam Ayyappa*%0A%0A` +
                       `*New Vazhipadu Booking*%0A` +
@@ -333,7 +403,7 @@
         function openGeneralChat() { window.open(`https://wa.me/${templeNumber}?text=Swamiye Saranam Ayyappa.`, '_blank'); }
         function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
         
-        // STATUS LOGIC
+        // 5. STATUS LOGIC
         function checkStatus() {
             const now = new Date();
             const day = now.getDay(); 
