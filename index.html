@@ -168,7 +168,7 @@
         .deity-info { padding: 30px 20px; }
         .deity-info h3 { font-size: 1.4rem; color: var(--dark); margin-bottom: 5px; letter-spacing: 0.5px; }
 
-        /* --- NEW BOOKING LAYOUT (Merged Style) --- */
+        /* --- PREMIUM BOOKING LAYOUT --- */
         .booking-layout {
             display: flex; gap: 30px; position: relative;
         }
@@ -190,63 +190,109 @@
             font-size: 0.9rem;
         }
         .tab-btn.active {
-            background: var(--gold-btn); /* Matches site theme */
+            background: var(--gold-btn);
             color: var(--white);
             border: none;
             box-shadow: 0 4px 10px rgba(183, 134, 40, 0.3);
         }
         .tab-btn:hover:not(.active) { background-color: #f0f0f0; }
 
-        /* Service Grid */
+        /* --- PREMIUM SERVICE CARD DESIGN (CLEAN & READABLE) --- */
         .service-grid-new {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
         }
+
         .service-card {
             background: var(--white);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: var(--shadow);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
             border: 1px solid rgba(0,0,0,0.05);
-            transition: 0.3s;
+            border-top: 4px solid var(--primary); /* Gold Top Border */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 160px;
+            height: 190px;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Hover Effect */
         .service-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 25px rgba(211, 84, 0, 0.15);
+            transform: translateY(-7px);
+            box-shadow: 0 20px 40px rgba(211, 84, 0, 0.15);
+            border-color: rgba(211, 84, 0, 0.3);
         }
-        .svc-name { font-weight: 700; font-size: 1.05rem; color: var(--secondary); font-family: 'Playfair Display', serif; }
-        .svc-cat { font-size: 0.8rem; color: #888; text-transform: uppercase; margin-top: 5px; letter-spacing: 1px; }
-        .svc-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-        .svc-price { color: var(--primary); font-weight: 800; font-size: 1.1rem; }
+
+        .svc-name { 
+            font-family: 'Poppins', sans-serif; /* READABLE FONT */
+            font-weight: 600; 
+            font-size: 1.1rem; 
+            color: var(--dark);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
         
-        .add-btn-small {
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
+        .svc-cat { 
+            font-size: 0.75rem; 
+            color: #999; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
             font-weight: 600;
-            font-size: 0.8rem;
-            transition: 0.2s;
-            text-transform: uppercase;
         }
-        .add-btn-small:hover { background: var(--primary); color: white; }
+
+        .svc-bottom { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 20px; 
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0; 
+            position: relative;
+            z-index: 2;
+        }
+
+        .svc-price { 
+            color: var(--primary); 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Premium Button */
+        .add-btn-small {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 8px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .add-btn-small:hover { 
+            background: var(--gold-btn); 
+            border-color: transparent;
+            color: white; 
+            box-shadow: 0 5px 15px rgba(183, 134, 40, 0.4);
+            transform: scale(1.05);
+        }
 
         /* Sticky Cart Box */
         .sticky-cart {
             background: var(--white);
             padding: 25px;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: var(--shadow);
             position: sticky;
-            top: 100px; /* Sticks below header */
+            top: 100px;
             border-top: 4px solid var(--primary);
         }
         .cart-header { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; color: var(--primary); }
@@ -259,7 +305,13 @@
         .cart-item { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; }
         .remove { color: #e74c3c; cursor: pointer; margin-left: 10px; font-size: 0.8rem; }
 
-        .total-row { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: var(--dark); margin-bottom: 20px; font-family: 'Playfair Display', serif; }
+        /* UPDATED: Total Row now uses Readable Font */
+        .total-row { 
+            display: flex; justify-content: space-between; 
+            font-size: 1.2rem; font-weight: bold; 
+            color: var(--dark); margin-bottom: 20px; 
+            font-family: 'Poppins', sans-serif; /* CHANGED FROM PLAYFAIR */
+        }
 
         .wa-btn-full {
             width: 100%;
@@ -553,7 +605,7 @@
             totalSpan.innerText = total;
         }
 
-        // --- WHATSAPP CHECKOUT ---
+        // --- WHATSAPP CHECKOUT (FIXED EMOJIS) ---
         function bookNow() {
             if(cart.length === 0) { alert("Please select at least one Offering."); return; }
             
@@ -563,22 +615,24 @@
 
             if(!name || !date || !star) { alert("Please fill Name, Date, and Star."); return; }
 
-            let msg = `*Manikandapuram Temple Booking Request*%0A%0A`;
-            msg += `👤 *Name:* ${name}%0A`;
-            msg += `📅 *Date:* ${date}%0A`;
-            msg += `⭐ *Star:* ${star}%0A%0A`;
-            msg += `*Selected Vazhipadu:*%0A`;
+            // Use Standard JavaScript String + EncodeURIComponent for Emoji Safety
+            let msg = `*Manikandapuram Temple Booking Request*\n\n`;
+            msg += `👤 *Name:* ${name}\n`;
+            msg += `📅 *Date:* ${date}\n`;
+            msg += `⭐ *Star:* ${star}\n\n`;
+            msg += `*Selected Vazhipadu:*\n`;
             
             let total = 0;
             cart.forEach(item => {
-                msg += `- ${item.name} (₹${item.price})%0A`;
+                msg += `- ${item.name} (₹${item.price})\n`;
                 total += item.price;
             });
 
-            msg += `%0A*Total Amount: ₹${total}*`;
-            msg += `%0A%0APlease confirm details.`;
+            msg += `\n*Total Amount: ₹${total}*`;
+            msg += `\n\nPlease confirm details.`;
 
-            window.open(`https://wa.me/${templeNumber}?text=${msg}`, '_blank');
+            // Open WhatsApp with properly encoded text
+            window.open('https://wa.me/' + templeNumber + '?text=' + encodeURIComponent(msg), '_blank');
         }
 
         // --- HELPERS (Dates, Stars, Banner) ---
