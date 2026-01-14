@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manikandapuram Sree Dharmasastha Kshethram</title>
+    
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1006/1006619.png" type="image/png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            /* Temple Colors */
+            --primary: #d35400;      
+            --primary-gradient: linear-gradient(135deg, #e67e22, #d35400);
+            --gold: #b78628;
+            --gold-gradient: linear-gradient(135deg, #f1c40f, #b78628);
+            
+            /* WhatsApp Premium Gradient */
+            --wa-gradient: linear-gradient(45deg, #25d366, #128C7E); 
+            
+            --dark: #2c3e50;
+            --cream: #f9f7f2;       
+            --white: #ffffff;
+            
+            /* UI */
+            --cart-header: #8e44ad; 
+            --shadow: 0 15px 35px rgba(0,0,0,0.1);
+            --card-hover: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--cream);
+            color: var(--dark);
+            line-height: 1.7;
+        }
+
+        h1, h2, h3, .logo { font-family: 'Playfair Display', serif; }
+
+        /* --- HEADER --- */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-bottom: 2px solid rgba(183, 134, 40, 0.2); 
+        }
+        nav {
+            max-width: 1200px; margin: 0 auto; padding: 0.8rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem; font-weight: 800; color: var(--primary);
+            text-decoration: none; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 12px; 
+        }
+        .logo img { height: 48px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        
+        .nav-links { list-style: none; display: flex; gap: 35px; }
+        .nav-links a { 
+            text-decoration: none; color: var(--dark); font-weight: 600; 
+            font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;
+            transition: 0.3s; position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0;
+            background: var(--primary); transition: width 0.3s;
+        }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a:hover::after { width: 100%; }
+        
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); }
+
+        /* --- HERO --- */
+        .hero {
+            position: relative; height: 60vh; 
+            background-image: url('images/banner1.jpg'); 
+            background-size: cover; background-position: center;
+            background-attachment: fixed;
+            display: flex; align-items: flex-end; justify-content: center;
+            text-align: center; color: white; transition: background-image 1s ease-in-out;
+        }
+        .hero-overlay {
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.1)); 
+            padding: 40px 20px 60px 20px; 
+        }
+        .hero h1 { 
+            font-size: 3.2rem; margin-bottom: 10px; 
+            text-shadow: 2px 4px 15px rgba(0,0,0,0.6); 
+            color: #fff; line-height: 1.1; letter-spacing: 1px;
+        }
+        .hero p { font-size: 1.2rem; color: #f0f0f0; margin-bottom: 25px; letter-spacing: 0.5px; }
+        
+        /* GHOST BUTTON */
+        .hero-btn {
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; padding: 12px 35px; text-decoration: none;
+            border-radius: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px;
+            border: 2px solid white; backdrop-filter: blur(4px);
+            transition: all 0.3s ease; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .hero-btn:hover { 
+            background: white; color: var(--primary); transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        /* --- TIMINGS SECTION (UPDATED FONTS) --- */
+        .timings-box {
+            background: var(--white);
+            max-width: 1000px; margin: -40px auto 60px auto; 
+            border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative; z-index: 10;
+            display: grid; grid-template-columns: 1.2fr 1fr 1fr; 
+            text-align: center; overflow: hidden;
+            border-bottom: 4px solid var(--gold); 
+        }
+        .time-col { 
+            padding: 30px 20px; border-right: 1px solid #f0f0f0; 
+            display: flex; flex-direction: column; justify-content: center;
+            transition: background 0.3s;
+        }
+        .time-col:hover { background: #fffdf5; }
+        .time-col:first-child { background: #fff8e1; border-right: 1px solid #e0d0b0; } 
+        .time-col:last-child { border-right: none; }
+        
+        .time-icon { font-size: 2rem; background: -webkit-linear-gradient(#d35400, #b78628); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        .time-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 5px; color: var(--dark); text-transform: uppercase; letter-spacing: 1px; }
+        .time-val { font-size: 1.15rem; font-weight: 700; color: #444; }
+        
+        /* UPDATED: No Italics, Cleaner Look */
+        .time-desc { 
+            font-size: 0.9rem; color: #666; margin-top: 5px; 
+            line-height: 1.6; font-style: normal; font-weight: 500;
+        }
+        .highlight-text { color: var(--primary); font-weight: 800; }
+
+        /* --- SECTIONS --- */
+        section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header h2 { 
+            font-size: 2.8rem; color: var(--primary); margin-bottom: 10px; 
+            background: linear-gradient(to right, #b78628, #d35400);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .section-header .divider-box { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .line { width: 60px; height: 3px; background: var(--gold); border-radius: 2px; }
+        .diamond { width: 10px; height: 10px; background: var(--primary); transform: rotate(45deg); }
+
+        /* --- DEITIES --- */
+        .deity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 35px; }
+        .deity-card {
+            background: var(--white); border-radius: 16px; overflow: hidden;
+            box-shadow: var(--shadow); text-align: center; border-bottom: 5px solid var(--gold);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .deity-card:hover { transform: translateY(-10px); box-shadow: var(--card-hover); }
+        .deity-img { height: 300px; width: 100%; object-fit: cover; background-color: #f8f8f8; }
+        .deity-info { padding: 25px; }
+        .deity-info h3 { font-size: 1.5rem; color: var(--dark); margin-bottom: 5px; }
+
+        /* --- BOOKING --- */
+        .booking-container { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: start; }
+        
+        .booking-form-card, .cart-card {
+            background: white; border-radius: 16px; overflow: hidden; 
+            box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card-header {
+            background: var(--primary-gradient); 
+            color: white; padding: 18px 25px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
+            font-size: 1.1rem;
+        }
+        .form-body { padding: 30px; }
+        .cart-body { padding: 0; }
+        
+        label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: #444; letter-spacing: 0.5px; }
+        input, select { 
+            width: 100%; padding: 14px; margin-bottom: 20px; 
+            border: 2px solid #eee; border-radius: 8px; outline: none; 
+            background: #fafafa; font-size: 0.95rem; transition: border-color 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--gold); background: #fff; }
+
+        .add-btn { 
+            width: 100%; padding: 14px; background: var(--gold-gradient); 
+            color: white; border: none; border-radius: 8px; font-weight: 700; 
+            cursor: pointer; transition: 0.3s; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(183, 134, 40, 0.3);
+        }
+        .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(183, 134, 40, 0.5); }
+
+        /* --- UPDATED WHATSAPP BUTTON (GRADIENT & GLOW) --- */
+        .whatsapp-pay-btn { 
+            width: 100%; padding: 16px; 
+            /* Gradient for 3D/Premium look */
+            background: var(--wa-gradient);
+            color: white; border: none; font-weight: 800; font-size: 1.1rem; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+        .whatsapp-pay-btn:hover { 
+            /* Reverse gradient or lighten on hover */
+            background: linear-gradient(45deg, #20bd5a, #0e7a6e);
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .discard-btn { width: 100%; padding: 12px; background: #fff; color: #e74c3c; border: none; font-weight: 600; cursor: pointer; border-top: 1px solid #eee; transition: 0.2s; }
+        .discard-btn:hover { background: #fff5f5; }
+
+        .cart-table { width: 100%; border-collapse: collapse; }
+        .cart-table th, .cart-table td { padding: 15px 20px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; }
+        .cart-table th { background: #fdfdfd; color: #888; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
+        .cart-total-row { padding: 20px; display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; background: #fffbf0; color: var(--primary); }
+        .delete-item { color: #ff6b6b; cursor: pointer; margin-left: 10px; transition: 0.2s; }
+        .delete-item:hover { color: #c0392b; transform: scale(1.2); }
+
+        .contact-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; background: var(--white); padding: 50px; border-radius: 20px; box-shadow: var(--shadow); }
+        .contact-details p { margin-bottom: 18px; color: #555; font-size: 1rem; display: flex; align-items: center; }
+        .contact-details i { color: var(--primary); margin-right: 15px; font-size: 1.2rem; width: 25px; text-align: center; }
+        .dist-tag { 
+            display: inline-block; background: #fff3e0; padding: 8px 15px; 
+            border-radius: 30px; font-size: 0.9rem; margin-right: 8px; margin-bottom: 10px; 
+            color: #d35400; border: 1px solid #ffe0b2; font-weight: 500;
+        }
+        .dist-tag strong { color: var(--dark); font-weight: 700; }
+
+        footer { background: #111; color: #888; text-align: center; padding: 50px 20px; margin-top: 80px; border-top: 5px solid var(--gold); }
+        
+        @media (max-width: 768px) {
+            .booking-container { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .menu-toggle { display: block; }
+            .hero { height: 50vh; }
+            .hero h1 { font-size: 2rem; }
+            .logo { font-size: 1.1rem; } .logo img { height: 35px; }
+            .timings-box { grid-template-columns: 1fr; margin-top: 0; border-radius: 0; border-bottom: none; }
+            .time-col { border-right: none; border-bottom: 1px solid #eee; padding: 25px 20px; }
+            .contact-wrapper { grid-template-columns: 1fr; padding: 30px; }
+        }
+        
+        iframe { width: 100%; height: 100%; min-height: 350px; border-radius: 12px; border: none; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); }
+        .float-wa { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--whatsapp); color: white; border-radius: 50%; text-align: center; font-size: 30px; box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4); z-index: 9999; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.3s; }
+        .float-wa:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <a href="#" onclick="openGeneralChat()" class="float-wa"><i class="fab fa-whatsapp"></i></a>
+
+    <header>
+        <nav>
+            <a href="#" class="logo">
+                <img src="images/ayyappa1.png" alt="Ayyappa Logo">
+                Manikandapuram Temple
+            </a>
+            <div class="menu-toggle"><i class="fas fa-bars"></i></div>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#deities">Deities</a></li>
+                <li><a href="#booking">Pooja Booking</a></li>
+                <li><a href="#location">Location</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero" id="heroSection">
+        <div class="hero-overlay">
+            <h1>Sree Dharmasastha Kshethram</h1>
+            <p>Panapuzha, Kannur</p>
+            <a href="#booking" class="hero-btn"><i class="fab fa-whatsapp"></i> Book Now</a>
+        </div>
+    </section>
+
+    <div class="timings-box">
+        <div class="time-col">
+            <div class="time-icon"><i class="fas fa-calendar-check"></i></div>
+            <div class="time-title">Opening Days</div>
+            <div class="time-desc">
+                <span class="highlight-text">Saturdays</span> & Malayalamasam 1st<br>
+                Sankramam (Evening Only)<br>
+                All Special Festival Days<br>
+                Mandalam Season
+            </div>
+        </div>
+        <div class="time-col">
+            <div class="time-icon"><i class="fas fa-sun"></i></div>
+            <div class="time-title">Morning</div>
+            <div class="time-val">5:30 AM - 9:30 AM</div>
+            <div class="time-desc">Nirmalyam to Usha Pooja</div>
+        </div>
+        <div class="time-col">
+            <div class="time-icon"><i class="fas fa-moon"></i></div>
+            <div class="time-title">Evening</div>
+            <div class="time-val">5:30 PM - 8:00 PM</div>
+            <div class="time-desc">Deeparadhana at 6:45 PM</div>
+        </div>
+    </div>
+
+    <section id="deities">
+        <div class="section-header">
+            <h2>Our Deities</h2>
+            <div class="divider-box">
+                <div class="line"></div><div class="diamond"></div><div class="line"></div>
+            </div>
+        </div>
+        <div class="deity-grid" id="deity-container"></div>
+    </section>
+
+    <section id="booking" style="background-color: #fdfbf7;">
+        <div class="section-header">
+            <h2>Online Pooja Booking</h2>
+            <div class="divider-box">
+                <div class="line"></div><div class="diamond"></div><div class="line"></div>
+            </div>
+            <p style="margin-top:15px; color:#666;">Add offerings to your cart and confirm via WhatsApp.</p>
+        </div>
+
+        <div class="booking-container">
+            <div class="booking-form-card">
+                <div class="card-header"><i class="fas fa-edit"></i> Pooja Details</div>
+                <div class="form-body">
+                    <label>Beneficiary Name *</label>
+                    <input type="text" id="devName" placeholder="Name of person">
+
+                    <label>Mobile Number *</label>
+                    <input type="tel" id="devMobile" placeholder="Contact Number">
+
+                    <label>Birth Star (Nakshatram) *</label>
+                    <select id="devStar">
+                        <option value="">Select Star</option>
+                    </select>
+
+                    <label>Pooja / Offering *</label>
+                    <select id="poojaSelect" onchange="checkVellattam()">
+                        <option value="" data-price="0">Select Offering</option>
+                        <option value="Pushpanjali" data-price="10">Pushpanjali (₹10)</option>
+                        <option value="Ganapathi Homam" data-price="75">Ganapathi Homam (₹75)</option>
+                        <option value="Bhagavathi Seva" data-price="100">Bhagavathi Seva (₹100)</option>
+                        <option value="Neyyabhishekam" data-price="100">Neyyabhishekam (₹100)</option>
+                        <option value="Muthappan Vellattam" data-price="10000">Muthappan Vellattam (₹10,000)</option>
+                    </select>
+
+                    <label>Date of Pooja</label>
+                    <select id="visitDate">
+                        <option value="">Select Date</option>
+                    </select>
+
+                    <button class="add-btn" onclick="addToCart()"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="cart-card">
+                <div class="card-header"><i class="fas fa-shopping-cart"></i> My Booking List</div>
+                <div class="cart-body">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Pooja Details</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartItems">
+                            <tr><td colspan="3" style="text-align:center; padding:30px; color:#999; font-style:italic;">Your cart is empty</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="cart-total-row">
+                    <span>TOTAL</span>
+                    <span id="cartTotal">₹ 0</span>
+                </div>
+
+                <button class="whatsapp-pay-btn" onclick="sendBooking()">
+                     REVIEW & BOOK <i class="fab fa-whatsapp"></i>
+                </button>
+                
+                <button class="discard-btn" onclick="clearCart()">Discard All</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="location">
+        <div class="section-header">
+            <h2>Visit Us</h2>
+            <div class="divider-box">
+                <div class="line"></div><div class="diamond"></div><div class="line"></div>
+            </div>
+        </div>
+        
+        <div class="contact-wrapper">
+            <div class="info-side">
+                <h3 style="color:var(--primary); margin-bottom:20px; font-family:'Playfair Display', serif; font-size:1.8rem;">Contact & Location</h3>
+                <div class="contact-details">
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>Manikandapuram Sree Dharmasastha Kshethram</strong><br>Anatty Rd, Panapuzha, Kannur - 670306</p>
+                    <p><i class="fas fa-envelope"></i> manikandapuram@gmail.com</p>
+                    <p><i class="fab fa-whatsapp"></i> +91 9656277945</p>
+                </div>
+                
+                <hr style="border:0; border-top:1px solid #eee; margin:25px 0;">
+                
+                <h4 style="margin-bottom:15px; color:var(--dark); text-transform:uppercase; letter-spacing:1px; font-size:0.9rem;">Distances</h4>
+                <div>
+                    <span class="dist-tag">Taliparamba: <strong>15 km</strong></span>
+                    <span class="dist-tag">Payyannur: <strong>20 km</strong></span>
+                    <span class="dist-tag">Kannur: <strong>37 km</strong></span>
+                </div>
+            </div>
+            
+            <div class="map-side">
+               <iframe 
+                   width="100%" 
+                   height="100%" 
+                   style="border:0; border-radius:12px; min-height: 350px;" 
+                   loading="lazy" 
+                   allowfullscreen 
+                   src="https://maps.google.com/maps?q=Manikandapuram+Sree+Dharmasastha+Kshethram+Panapuzha&t=&z=13&ie=UTF8&iwloc=&output=embed">
+               </iframe>
+            </div>
+        </div>
+    </section>
+
+    <footer><p>© 2026 Manikandapuram Kshethram | Swamiye Saranam Ayyappa</p></footer>
+
+    <script>
+        const templeNumber = "919656277945"; 
+        let cart = [];
+
+        function addToCart() {
+            const name = document.getElementById('devName').value;
+            const mobile = document.getElementById('devMobile').value;
+            const star = document.getElementById('devStar').value;
+            const poojaEl = document.getElementById('poojaSelect');
+            const poojaName = poojaEl.value;
+            const price = parseInt(poojaEl.options[poojaEl.selectedIndex].getAttribute('data-price'));
+            const dateEl = document.getElementById('visitDate');
+            let date = dateEl.value;
+
+            if(!name || !mobile || !star || !poojaName) {
+                alert("Please fill all fields marked with *");
+                return;
+            }
+            if(!date && poojaName !== "Muthappan Vellattam") {
+                alert("Please select a date.");
+                return;
+            }
+            if(poojaName === "Muthappan Vellattam") {
+                date = "To be Decided";
+            }
+
+            const item = {
+                id: Date.now(),
+                name: name,
+                mobile: mobile,
+                star: star,
+                pooja: poojaName,
+                price: price,
+                date: date
+            };
+
+            cart.push(item);
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            tbody.innerHTML = "";
+            let total = 0;
+
+            if(cart.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:30px; color:#999; font-style:italic;">Your cart is empty</td></tr>';
+                totalEl.innerText = "₹ 0";
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <strong style="color:var(--primary);">${item.pooja}</strong><br>
+                        <small style="font-weight:600;">${item.name}</small> <small style="color:#777;">(${item.star})</small><br>
+                        <small style="color:#888;">📅 ${item.date}</small>
+                    </td>
+                    <td style="text-align:right; font-weight:600;">₹${item.price}</td>
+                    <td style="text-align:right;"><i class="fas fa-trash delete-item" onclick="removeFromCart(${index})"></i></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            totalEl.innerText = "₹ " + total;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function clearCart() {
+            if(confirm("Clear all items?")) {
+                cart = [];
+                renderCart();
+            }
+        }
+
+        function sendBooking() {
+            if(cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+
+            let msg = "*Swamiye Saranam Ayyappa*\n\n";
+            msg += "*📦 New Pooja Booking*\n";
+            
+            let grandTotal = 0;
+
+            cart.forEach((item, i) => {
+                grandTotal += item.price;
+                msg += `------------------------------\n`;
+                msg += `*${i+1}. ${item.pooja} (₹${item.price})*\n`;
+                msg += `👤 Name: ${item.name}\n`;
+                msg += `✨ Star: ${item.star}\n`;
+                msg += `📅 Date: ${item.date}\n`;
+                if(i===0) msg += `📞 Mobile: ${item.mobile}\n`; 
+            });
+
+            msg += `------------------------------\n`;
+            msg += `*💰 GRAND TOTAL: ₹${grandTotal}*\n`;
+            msg += `------------------------------\n`;
+            msg += `Please confirm receipt and payment details.`;
+
+            let encodedMsg = encodeURIComponent(msg);
+            window.open(`https://wa.me/${templeNumber}?text=${encodedMsg}`, '_blank');
+        }
+
+        // --- SUPPORTING LOGIC ---
+        const bannerImages = ["images/banner1.jpg", "images/banner2.jpg", "images/banner3.jpg"];
+        let currentBannerIndex = 0;
+        const heroSection = document.getElementById('heroSection');
+        setInterval(() => {
+            currentBannerIndex = (currentBannerIndex + 1) % bannerImages.length;
+            heroSection.style.backgroundImage = `url('${bannerImages[currentBannerIndex]}')`;
+        }, 3000);
+
+        const deities = [
+            { name: "Sree Dharmasastha", img: "images/ayyappa.png" },
+            { name: "Lord Ganesha", img: "images/ganesha.png" },
+            { name: "Sree Muthappan", img: "images/muthappan.png" },
+            { name: "Devi", img: "images/devi.png" }
+        ];
+        const dContainer = document.getElementById('deity-container');
+        deities.forEach(god => {
+            dContainer.innerHTML += `<div class="deity-card"><img src="${god.img}" class="deity-img"><div class="deity-info"><h3>${god.name}</h3></div></div>`;
+        });
+
+        const stars = ["Aswathy", "Bharani", "Karthika", "Rohini", "Makayiram", "Thiruvathira", "Punartham", "Pooyam", "Ayilyam", "Makam", "Pooram", "Uthram", "Atham", "Chithira", "Chothi", "Vishakham", "Anizham", "Thrikketta", "Moolam", "Pooradam", "Uthradam", "Thiruvonam", "Avittam", "Chathayam", "Poororuttathi", "Uthrattathi", "Revathi"];
+        const starSelect = document.getElementById('devStar');
+        stars.forEach(s => { let o = document.createElement("option"); o.text = s; o.value = s; starSelect.add(o); });
+
+        function generateDates() {
+            const selectBox = document.getElementById('visitDate');
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const year = 2026; 
+            const specialEvents = [
+                { d: 14, m: 0, label: "Makaravilakku" }, { d: 15, m: 0, label: "Jan 15" },
+                { d: 13, m: 1, label: "Kumbham 1" }, { d: 15, m: 2, label: "Meenam 1" },
+                { d: 14, m: 3, label: "Vishu" }, { d: 15, m: 4, label: "Edavam 1" },
+                { d: 15, m: 5, label: "Midhunam 1" }, { d: 17, m: 6, label: "Karkidakam 1" },
+                { d: 17, m: 7, label: "Chingam 1" }, { d: 17, m: 8, label: "Kanni 1" },
+                { d: 17, m: 9, label: "Thulam 1" }, { d: 16, m: 10, label: "Vrischikam 1" },
+                { d: 16, m: 11, label: "Dhanu 1" }
+            ];
+            const mandalamStart = new Date(2026, 10, 17); 
+            const mandalamEnd = new Date(2026, 11, 27);
+
+            let startDate = new Date(year, 0, 1);
+            if(today.getFullYear() === year) startDate = new Date(today);
+            let endDate = new Date(year, 11, 31);
+            let currentMonthGroup = null;
+            let currentMonthIndex = -1;
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                if (d < today) continue;
+                let day = d.getDay(); 
+                let dateNum = d.getDate();
+                let month = d.getMonth();
+                let isSaturday = (day === 6);
+                let special = specialEvents.find(s => s.d === dateNum && s.m === month);
+                let isMandalam = (d >= mandalamStart && d <= mandalamEnd);
+
+                if (isSaturday || special || isMandalam) {
+                    if (month !== currentMonthIndex) {
+                        currentMonthIndex = month;
+                        let monthName = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+                        currentMonthGroup = document.createElement('optgroup');
+                        currentMonthGroup.label = monthName;
+                        selectBox.appendChild(currentMonthGroup);
+                    }
+                    let dayName = d.toLocaleDateString('en-GB', { weekday: 'short' }); 
+                    let dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }); 
+                    let label = `${dayName}, ${dateStr}`;
+                    if (special) label += ` - ${special.label}`;
+                    
+                    let option = document.createElement("option");
+                    option.value = label;
+                    option.text = label;
+                    currentMonthGroup.appendChild(option);
+                }
+            }
+        }
+        generateDates();
+
+        function checkVellattam() {
+            const poojaVal = document.getElementById('poojaSelect').value;
+            const dateSelect = document.getElementById('visitDate');
+            if(poojaVal === "Muthappan Vellattam") {
+                dateSelect.disabled = true;
+                dateSelect.innerHTML = '<option>Date to be Scheduled</option>';
+            } else {
+                dateSelect.disabled = false;
+                dateSelect.innerHTML = '<option value="">Select Date</option>';
+                generateDates();
+            }
+        }
+        
+        function openGeneralChat() { window.open(`https://wa.me/${templeNumber}?text=Swamiye Saranam Ayyappa.`, '_blank'); }
+    </script>
+</body>
+</html>
