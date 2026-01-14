@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Receipt Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f4f4f4; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .input-area { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin-bottom: 20px; }
+        textarea { width: 100%; height: 100px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: sans-serif; }
+        
+        .btn-primary { width: 100%; padding: 12px; background: #d35400; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-primary:hover { background: #a04000; }
+
+        .actions { display: none; gap: 10px; margin-top: 20px; }
+        .btn-action { padding: 12px 30px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: white; font-size: 16px; }
+        .btn-pdf { background: #27ae60; }
+        .btn-pdf:hover { background: #219150; }
+
+        .receipt-box {
+            background: white; width: 350px; padding: 30px;
+            border-radius: 10px; position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-top: 5px solid #d35400;
+            display: none; 
+            margin-bottom: 50px;
+        }
+        .header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 20px; margin-bottom: 20px; }
+        .bill-logo { width: 80px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+        
+        /* UPDATED: Reduced Boldness to 600 (Semi-Bold) */
+        .title { 
+            font-size: 18px; 
+            font-weight: 600; 
+            color: #d35400; 
+            line-height: 1.3; 
+            margin-bottom: 8px; 
+            text-transform: uppercase; 
+        }
+        .subtitle { 
+            font-size: 11px; 
+            color: #444; 
+            font-weight: 500; 
+        }
+        
+        .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .label { color: #666; font-weight: 500; }
+        .val { font-weight: 600; color: #000; text-align: right; }
+        
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+        .items-table th { text-align: left; color: #666; font-weight: 600; border-bottom: 1px solid #aaa; padding-bottom: 5px; }
+        .items-table td { padding: 8px 0; border-bottom: 1px solid #eee; color: #000; font-weight: 500; }
+        .price-col { text-align: right; }
+        
+        /* UPDATED: Reduced Total Boldness */
+        .total-section { border-top: 2px dashed #ddd; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .total-label { font-size: 16px; font-weight: 600; color: #000; }
+        .total-amount { font-size: 20px; font-weight: 700; color: #d35400; }
+        
+        /* UPDATED: Reduced Footer Boldness */
+        .footer { text-align: center; margin-top: 30px; }
+        .footer-main { font-size: 16px; font-weight: 600; color: #000; margin-bottom: 5px; text-transform: uppercase; }
+        .footer-sub { font-size: 11px; color: #666; font-weight: 500;}
+
+        .stamp { position: absolute; bottom: 100px; right: 40px; border: 3px solid #27ae60; color: #27ae60; font-weight: bold; padding: 5px 10px; transform: rotate(-15deg); opacity: 0.2; font-family: 'Courier New', Courier, monospace; text-transform: uppercase; letter-spacing: 2px; font-size: 20px; pointer-events: none; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .input-area, .actions { display: none !important; }
+            .receipt-box { display: block !important; box-shadow: none; border: 1px solid #ddd; margin: 0 auto; top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="input-area">
+        <h3 style="margin-top:0; color:#333;">Paste WhatsApp Message</h3>
+        <textarea id="waText" placeholder="Paste the booking message here..."></textarea>
+        <button class="btn-primary" onclick="generateReceipt()">Generate Receipt</button>
+    </div>
+
+    <div class="receipt-box" id="receipt">
+        <div class="header">
+            <img src="images/bill.png" alt="Ayyappa" class="bill-logo">
+            <div class="title">Manikandapuram Sree Dharmasastha Temple</div>
+            <div class="subtitle">Paravoor, Panapuzha, Kannur(Dist) - 670306</div>
+        </div>
+
+        <div class="row"><span class="label">Receipt No:</span><span class="val" id="rNo"></span></div>
+        <div class="row"><span class="label">Booking Date:</span><span class="val" id="rBookingDate"></span></div>
+        <div class="row"><span class="label">Pooja Date:</span><span class="val" id="rPoojaDate"></span></div>
+        <div class="row"><span class="label">Devotee:</span><span class="val" id="rName"></span></div>
+        <div class="row"><span class="label">Star:</span><span class="val" id="rStar"></span></div>
+
+        <table class="items-table">
+            <thead><tr><th>Offering Item</th><th class="price-col">Price</th></tr></thead>
+            <tbody id="rItems"></tbody>
+        </table>
+
+        <div class="total-section"><span class="total-label">Grand Total</span><span class="total-amount" id="rTotal">₹0</span></div>
+        
+        <div class="footer">
+            <div class="footer-main">Swami Saranam</div>
+            <div class="footer-sub">Booking via Online Portal</div>
+        </div>
+        
+        <div class="stamp">PAID</div>
+    </div>
+
+    <div class="actions" id="actionButtons">
+        <button class="btn-action btn-pdf" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+
+    <script>
+        function generateReceipt() {
+            const text = document.getElementById('waText').value;
+            if (!text) { alert("Please paste the message first!"); return; }
+
+            const nameMatch = text.match(/Name:\s*(.+)/);
+            const dateMatch = text.match(/Date:\s*(.+)/);
+            const starMatch = text.match(/Star:\s*(.+)/);
+            const itemMatches = [...text.matchAll(/-\s*(.+?)\s*\(₹(\d+)\)/g)];
+
+            const rawName = nameMatch ? nameMatch[1].trim() : 'Unknown';
+            const safeName = rawName.replace(/[^a-zA-Z0-9]/g, '_'); 
+            document.title = `Receipt_${safeName}`;
+
+            document.getElementById('rName').innerText = rawName;
+            
+            let poojaDate = dateMatch ? dateMatch[1].trim() : '-';
+            if (poojaDate !== '-' && !poojaDate.match(/\d{4}/)) {
+                poojaDate += ", " + new Date().getFullYear();
+            }
+            document.getElementById('rPoojaDate').innerText = poojaDate;
+            
+            document.getElementById('rBookingDate').innerText = new Date().toLocaleDateString('en-GB'); 
+            document.getElementById('rStar').innerText = starMatch ? starMatch[1].trim() : '-';
+
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = String(now.getFullYear()).slice(-2);
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('rNo').innerText = `MK-${day}${month}${year}-${randomNum}`;
+
+            const table = document.getElementById('rItems');
+            table.innerHTML = '';
+            let total = 0;
+
+            itemMatches.forEach(match => {
+                const itemName = match[1];
+                const itemPrice = parseInt(match[2]);
+                total += itemPrice;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${itemName}</td><td class="price-col">₹${itemPrice}</td>`;
+                table.appendChild(tr);
+            });
+
+            document.getElementById('rTotal').innerText = '₹' + total;
+
+            document.querySelector('.input-area').style.display = 'none'; 
+            document.getElementById('receipt').style.display = 'block';   
+            document.getElementById('actionButtons').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
