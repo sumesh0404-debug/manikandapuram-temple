@@ -21,46 +21,35 @@
         body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; color: var(--text); overflow-x: hidden; padding-bottom: 80px; }
 
         /* --- NAVIGATION --- */
-        .header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); sticky: top; z-index: 100; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; border-top: 1px solid var(--border); z-index: 1000; height: 70px; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; font-weight: 700; color: #64748b; font-size: 0.75rem; cursor: pointer; gap: 4px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; font-weight: 700; color: #64748b; font-size: 0.75rem; cursor: pointer; }
         .nav-item.active { color: var(--primary); }
 
         /* --- LAYOUT --- */
         .content { padding: 15px; max-width: 1200px; margin: 0 auto; }
-        .section-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-
-        /* --- INPUT GRID (FIXED OVERLAPS) --- */
+        .section-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
         .input-stack { display: flex; flex-direction: column; gap: 15px; }
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        .input-label { font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
-        .big-input { width: 100%; padding: 12px 15px; font-size: 1rem; font-weight: 600; border: 2px solid var(--border); border-radius: 10px; box-sizing: border-box; }
+        .big-input { width: 100%; padding: 14px; font-size: 1rem; font-weight: 600; border: 2px solid var(--border); border-radius: 10px; box-sizing: border-box; }
 
-        /* --- POOJA SELECTION --- */
-        .tab-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
-        .tab-pill { padding: 8px 20px; background: white; border: 2px solid var(--border); border-radius: 30px; font-weight: 700; white-space: nowrap; cursor: pointer; }
-        .tab-pill.active { border-color: var(--primary); color: var(--primary); background: #fff7ed; }
+        /* --- BUTTONS --- */
+        .btn-modern { border: none; border-radius: 12px; font-weight: 800; cursor: pointer; padding: 15px; color: white; transition: 0.2s; }
+        .btn-modern:active { transform: scale(0.96); }
 
-        .pooja-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .pooja-card { background: white; border: 1px solid var(--border); padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .pooja-card:active { transform: scale(0.95); background: #f8fafc; }
+        /* --- TABLES --- */
+        .report-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; font-size: 0.85rem; }
+        .report-table th { background: #f8fafc; padding: 12px; text-align: left; }
+        .report-table td { padding: 12px; border-top: 1px solid #eee; }
 
-        /* --- CART SUMMARY --- */
-        .cart-summary { background: white; border-top: 5px solid var(--green-grad); padding: 20px; border-radius: 20px 20px 0 0; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
-        
-        /* --- DESKTOP ADJUSTMENTS --- */
         @media (min-width: 900px) {
             body { padding-bottom: 0; display: flex; }
-            .bottom-nav { position: static; width: 260px; height: 100vh; flex-direction: column; border-top: none; border-right: 1px solid var(--border); padding: 20px; box-sizing: border-box; }
-            .nav-item { flex: none; width: 100%; height: 50px; flex-direction: row; justify-content: flex-start; padding: 0 15px; border-radius: 10px; margin-bottom: 5px; }
+            .bottom-nav { position: static; width: 260px; height: 100vh; flex-direction: column; border-right: 1px solid var(--border); padding: 20px; }
+            .nav-item { flex: none; width: 100%; height: 50px; flex-direction: row; justify-content: flex-start; padding: 0 15px; border-radius: 10px; margin-bottom: 10px; }
             .nav-item.active { background: var(--primary-grad); color: white; }
             .content { flex: 1; padding: 40px; }
-            .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
         }
 
-        /* --- PRINT --- */
         @media print {
-            body *, .header, .bottom-nav, .content, #login-screen { display: none !important; }
+            body *, .bottom-nav, .content, #login-screen { display: none !important; }
             #receipt-area, #receipt-area * { display: block !important; visibility: visible !important; }
             #receipt-area { position: absolute; left: 0; top: 0; width: 100%; }
         }
@@ -70,82 +59,78 @@
 <body>
 
     <div id="login-screen">
-        <div style="background:white; padding:40px; border-radius:24px; width:85%; max-width:380px; text-align:center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+        <div style="background:white; padding:40px; border-radius:24px; width:85%; max-width:380px; text-align:center;">
             <h2 style="color:var(--primary); margin:0;">Temple Admin</h2>
-            <p>Login to Counter</p>
-            <input type="email" id="email" class="big-input" style="margin-bottom:15px;" placeholder="Email">
-            <input type="password" id="password" class="big-input" style="margin-bottom:20px;" placeholder="Password">
-            <button onclick="login()" style="width:100%; padding: 15px; border-radius: 12px; border: none; background: var(--primary-grad); color: white; font-weight: 800;">LOGIN</button>
+            <input type="email" id="email" class="big-input" style="margin-top:20px;" placeholder="Email">
+            <input type="password" id="password" class="big-input" style="margin-top:15px;" placeholder="Password">
+            <button onclick="login()" class="btn-modern" style="width:100%; background:var(--primary-grad); margin-top:20px;">LOGIN</button>
         </div>
     </div>
 
-    <nav class="bottom-nav" id="main-nav">
+    <nav class="bottom-nav">
         <button class="nav-item active" id="nav-booking" onclick="switchView('booking')">BOOKING</button>
         <button class="nav-item" id="nav-reports" onclick="switchView('reports')">REPORTS</button>
         <button class="nav-item" style="color:#ef4444;" onclick="logout()">LOGOUT</button>
     </nav>
 
     <div class="content">
-        <div id="booking-view" class="main-layout">
-            <div class="booking-flow">
-                <div class="header" style="border:none; padding:0; margin-bottom:20px;">
-                    <h2 style="margin:0; font-weight:800;">Counter Booking</h2>
-                    <div style="text-align:right;">
-                        <small style="font-weight:700; color:#9a3412;">TODAY</small>
-                        <div id="dashTodayTotal" style="font-weight:800; color:var(--primary);">₹0</div>
-                    </div>
+        <div id="booking-view">
+            <div class="section-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 style="margin:0;">New Booking</h2>
+                    <div id="dashTodayTotal" style="font-weight:800; color:var(--primary); font-size:1.2rem;">₹0</div>
                 </div>
-
-                <div class="section-card">
-                    <div class="input-stack">
-                        <div class="input-group">
-                            <label class="input-label">Devotee Name</label>
-                            <input type="text" id="devName" class="big-input" placeholder="Type name...">
-                        </div>
-                        <div class="input-group">
-                            <label class="input-label">Star / നാൾ</label>
-                            <select id="star" class="big-input"></select>
-                        </div>
-                    </div>
+                <div class="input-stack">
+                    <input type="text" id="devName" class="big-input" placeholder="Devotee Name">
+                    <select id="star" class="big-input"></select>
                 </div>
-
-                <div class="tab-scroll" id="tabBar"></div>
-                <div class="pooja-grid" id="poojaGrid"></div>
             </div>
 
-            <div class="cart-summary" style="margin-top:30px;">
+            <div id="tabBar" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:15px;"></div>
+            <div id="poojaGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:12px;"></div>
+
+            <div class="section-card" style="margin-top:30px; border-top:5px solid #10b981;">
                 <h3 style="margin:0;">Selection Summary</h3>
-                <div id="billItems" style="min-height:100px; margin:15px 0;"></div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px dashed #eee; padding-top:15px;">
-                    <span style="font-weight:700;">TOTAL</span>
-                    <span style="font-size:2rem; font-weight:800;">₹<span id="grandTotal">0</span></span>
+                <div id="billItems" style="margin:15px 0;"></div>
+                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.5rem; border-top:2px dashed #eee; padding-top:15px;">
+                    <span>TOTAL</span><span>₹<span id="grandTotal">0</span></span>
                 </div>
-                <button onclick="confirmBooking()" style="width:100%; padding:18px; border-radius:12px; border:none; background: var(--green-grad); color:white; font-weight:800; font-size:1.1rem; margin-top:20px;">CONFIRM & PRINT</button>
+                <button onclick="confirmBooking()" class="btn-modern" style="width:100%; background:var(--green-grad); margin-top:20px;">PRINT RECEIPT</button>
             </div>
         </div>
 
         <div id="reports-view" class="hidden">
-            <h2 style="font-weight:800;">Temple Admin Portal</h2>
+            <h2 style="margin-bottom:20px;">Data Reports</h2>
             <div class="section-card">
                 <div class="input-stack">
+                    <label style="font-weight:700; font-size:0.8rem;">FROM DATE</label>
                     <input type="date" id="reportFrom" class="big-input">
+                    <label style="font-weight:700; font-size:0.8rem;">TO DATE</label>
                     <input type="date" id="reportTo" class="big-input">
-                    <button class="nav-item" style="background:var(--primary-grad); color:white; width:100%; height:50px; border-radius:10px;" onclick="generateCustomReport()">GENERATE</button>
+                    <button class="btn-modern" style="background:var(--primary-grad);" onclick="generateCustomReport()">GENERATE REPORT</button>
                 </div>
             </div>
-            <div id="reportTableBody" style="overflow-x:auto;"></div>
+            
+            <div id="reportSummary" class="hidden" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+                <div class="section-card" style="margin:0; text-align:center;"><small>TOTAL</small><div id="repTotal" style="font-weight:800; color:var(--primary);">₹0</div></div>
+                <div class="section-card" style="margin:0; text-align:center;"><small>COUNT</small><div id="repCount" style="font-weight:800;">0</div></div>
+            </div>
+
+            <div id="reportContainer" class="hidden" style="overflow-x:auto;">
+                <table class="report-table">
+                    <thead><tr><th>Date</th><th>Name</th><th style="text-align:right;">Amount</th></tr></thead>
+                    <tbody id="reportTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <div id="receipt-area" style="display:none;">
-        <div style="width:300px; padding:10px; font-family:sans-serif;">
-            <center><h3>Manikandapuram Temple</h3></center>
-            <div id="p-content"></div>
-            <center><h4>SWAMI SARANAM</h4></center>
-        </div>
+        <div id="p-content"></div>
     </div>
 
     <script>
+        // CONFIG REMAINS SAME
         const firebaseConfig = {
             apiKey: "AIzaSyDJZgk6BTF-0JuIw_BWyHkznWLYquAVi90",
             authDomain: "manikandapuram-temple.firebaseapp.com",
@@ -192,8 +177,9 @@
         function renderTabs() {
             const bar = document.getElementById('tabBar'); bar.innerHTML = "";
             Object.keys(poojaData).forEach(cat => {
-                const btn = document.createElement("div");
-                btn.className = `tab-pill ${cat === currentCategory ? 'active' : ''}`;
+                const btn = document.createElement("button");
+                btn.className = "btn-modern"; btn.style.padding = "10px 20px"; btn.style.background = cat === currentCategory ? "var(--primary-grad)" : "white";
+                btn.style.color = cat === currentCategory ? "white" : "var(--text)"; btn.style.border = "1px solid var(--border)";
                 btn.innerText = cat; btn.onclick = () => { currentCategory = cat; renderTabs(); renderPoojaGrid(); };
                 bar.appendChild(btn);
             });
@@ -202,7 +188,7 @@
         function renderPoojaGrid() {
             const grid = document.getElementById('poojaGrid'); grid.innerHTML = "";
             poojaData[currentCategory].forEach(s => {
-                grid.innerHTML += `<div class="pooja-card" onclick="addToCart(${s.id})"><b style="font-size:0.9rem;">${s.name}</b><br><small style="color:#64748b;">${s.ml}</small><br><span style="color:var(--primary); font-weight:800;">₹${s.price}</span></div>`;
+                grid.innerHTML += `<div onclick="addToCart(${s.id})" style="background:white; border:1px solid var(--border); padding:15px; border-radius:12px; text-align:center;"><b>${s.name}</b><br><small>${s.ml}</small><br><span style="color:var(--primary); font-weight:800;">₹${s.price}</span></div>`;
             });
         }
 
@@ -210,25 +196,28 @@
 
         function renderBill() {
             const container = document.getElementById('billItems');
-            if(currentCart.length === 0) { container.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">No items</p>'; document.getElementById('grandTotal').innerText = 0; return; }
+            if(currentCart.length === 0) { container.innerHTML = '<p style="text-align:center; color:#94a3b8;">Empty</p>'; document.getElementById('grandTotal').innerText = 0; return; }
             container.innerHTML = ""; let total = 0;
             currentCart.forEach((item, index) => {
                 total += item.price;
-                container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.9rem; border-bottom:1px solid #eee; padding-bottom:5px;"><span>${item.name}</span><span>₹${item.price} <span style="color:red; cursor:pointer;" onclick="currentCart.splice(${index},1);renderBill()">×</span></span></div>`;
+                container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${item.name}</span><span>₹${item.price} <span style="color:red;" onclick="currentCart.splice(${index},1);renderBill()">×</span></span></div>`;
             });
             document.getElementById('grandTotal').innerText = total;
         }
 
         function confirmBooking() {
             const name = document.getElementById('devName').value;
-            if(!name || currentCart.length === 0) return alert("Fill Name and select offerings.");
+            if(!name || currentCart.length === 0) return alert("Missing Details");
             const booking = { name: name, star: document.getElementById('star').value, total: parseInt(document.getElementById('grandTotal').innerText), items: currentCart, bookingDate: new Date().toLocaleDateString('en-GB'), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
-            db.collection("bookings").add(booking).then(doc => { printDirectly({...booking, id: "MK-"+doc.id.slice(-4).toUpperCase()}); currentCart = []; document.getElementById('devName').value = ""; renderBill(); });
+            db.collection("bookings").add(booking).then(doc => { 
+                printDirectly({...booking, id: "MK-"+doc.id.slice(-4).toUpperCase()}); 
+                currentCart = []; document.getElementById('devName').value = ""; renderBill(); 
+            });
         }
 
         function printDirectly(data) {
             const cont = document.getElementById('p-content');
-            cont.innerHTML = `<p><b>ID:</b> ${data.id} <span style="float:right">${data.bookingDate}</span></p><p><b>Name:</b> ${data.name}</p><p><b>Star:</b> ${data.star} / ${starMap[data.star] || ''}</p><hr>${data.items.map(i => `<p>${i.name} <span style="float:right">₹${i.price}</span></p>`).join('')}<hr><h2 style="text-align:right">Total: ₹${data.total}</h2>`;
+            cont.innerHTML = `<center><h3>Manikandapuram Temple</h3></center><p><b>ID:</b> ${data.id}</p><p><b>Name:</b> ${data.name}</p><p><b>Star:</b> ${data.star}</p><hr>${data.items.map(i => `<p>${i.name} <span style="float:right">₹${i.price}</span></p>`).join('')}<hr><h2 style="text-align:right">Total: ₹${data.total}</h2><center><h4>SWAMI SARANAM</h4></center>`;
             document.getElementById('receipt-area').style.display = 'block'; window.print(); document.getElementById('receipt-area').style.display = 'none';
         }
 
@@ -237,6 +226,42 @@
                 let sum = 0; snap.forEach(doc => sum += doc.data().total);
                 document.getElementById('dashTodayTotal').innerText = "₹" + sum;
             });
+        }
+
+        // --- FIXED MOBILE REPORT GENERATION ---
+        async function generateCustomReport() {
+            const fromRaw = document.getElementById('reportFrom').value;
+            const toRaw = document.getElementById('reportTo').value;
+
+            if(!fromRaw || !toRaw) return alert("Select Dates");
+
+            // Convert mobile dates (YYYY-MM-DD) to search dates
+            const startTime = new Date(fromRaw).setHours(0,0,0,0);
+            const endTime = new Date(toRaw).setHours(23,59,59,999);
+
+            const snap = await db.collection("bookings").get();
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = "";
+            let total = 0, count = 0;
+
+            snap.forEach(doc => {
+                const b = doc.data();
+                const [d, m, y] = b.bookingDate.split('/');
+                const bTime = new Date(`${y}-${m}-${d}`).getTime();
+
+                if (bTime >= startTime && bTime <= endTime) {
+                    total += b.total;
+                    count++;
+                    tbody.innerHTML += `<tr><td>${b.bookingDate}</td><td>${b.name}</td><td style="text-align:right;">₹${b.total}</td></tr>`;
+                }
+            });
+
+            document.getElementById('repTotal').innerText = "₹" + total;
+            document.getElementById('repCount').innerText = count;
+            document.getElementById('reportSummary').classList.remove('hidden');
+            document.getElementById('reportContainer').classList.remove('hidden');
+            
+            if(count === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No data found</td></tr>';
         }
     </script>
 </body>
