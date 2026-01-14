@@ -30,7 +30,6 @@
         .header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 20px; margin-bottom: 20px; }
         .bill-logo { width: 80px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
         
-        /* UPDATED: Reduced Boldness to 600 (Semi-Bold) */
         .title { 
             font-size: 18px; 
             font-weight: 600; 
@@ -39,11 +38,7 @@
             margin-bottom: 8px; 
             text-transform: uppercase; 
         }
-        .subtitle { 
-            font-size: 11px; 
-            color: #444; 
-            font-weight: 500; 
-        }
+        .subtitle { font-size: 11px; color: #444; font-weight: 500; }
         
         .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
         .label { color: #666; font-weight: 500; }
@@ -54,12 +49,10 @@
         .items-table td { padding: 8px 0; border-bottom: 1px solid #eee; color: #000; font-weight: 500; }
         .price-col { text-align: right; }
         
-        /* UPDATED: Reduced Total Boldness */
         .total-section { border-top: 2px dashed #ddd; padding-top: 15px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .total-label { font-size: 16px; font-weight: 600; color: #000; }
         .total-amount { font-size: 20px; font-weight: 700; color: #d35400; }
         
-        /* UPDATED: Reduced Footer Boldness */
         .footer { text-align: center; margin-top: 30px; }
         .footer-main { font-size: 16px; font-weight: 600; color: #000; margin-bottom: 5px; text-transform: uppercase; }
         .footer-sub { font-size: 11px; color: #666; font-weight: 500;}
@@ -122,6 +115,12 @@
             const dateMatch = text.match(/Date:\s*(.+)/);
             const starMatch = text.match(/Star:\s*(.+)/);
             const itemMatches = [...text.matchAll(/-\s*(.+?)\s*\(₹(\d+)\)/g)];
+
+            // --- VALIDATION CHECK: STOP IF NO NAME OR NO ITEMS ---
+            if (!nameMatch || itemMatches.length === 0) {
+                alert("Error: Invalid Message Format!\n\nPlease ensure you copied the FULL message from WhatsApp including Name and Items.");
+                return; // Stop here, do not generate receipt
+            }
 
             const rawName = nameMatch ? nameMatch[1].trim() : 'Unknown';
             const safeName = rawName.replace(/[^a-zA-Z0-9]/g, '_'); 
