@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manikandapuram Sree Dharmasastha Temple Portal</title>
+    <title>Manikandapuram Temple Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
@@ -18,24 +18,23 @@
                 background: #111827; color: white;
                 padding: 16px 24px; display: flex;
                 justify-content: space-between; align-items: center;
-                border-radius: 24px 24px 0 0; z-index: 100;
+                border-radius: 24px 24px 0 0; z-index: 50;
                 box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
             }
             .mobile-cart-overlay {
                 position: fixed; bottom: 0; left: 0; right: 0;
-                height: 85vh; background: white; z-index: 110;
+                height: 85vh; background: white; z-index: 60;
                 border-radius: 32px 32px 0 0; padding: 24px;
                 display: flex; flex-direction: column;
                 box-shadow: 0 -20px 50px rgba(0,0,0,0.2);
             }
-            button { touch-action: manipulation; }
         }
     </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, query, where, serverTimestamp, or } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, or, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBhzXyGNLYDDzQjA1w8NJ9NvyxAqv2onNY",
@@ -50,7 +49,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ✅ LOAD CART FROM STORAGE OR START EMPTY
+        // ✅ 1. LOAD FROM STORAGE (Prevents emptying on refresh)
         let cart = JSON.parse(localStorage.getItem('temple_cart')) || [];
         let autoMalayalamName = "";
         let isProcessing = false;
@@ -61,7 +60,7 @@
             if (user) {
                 currentUser.innerText = user.email;
                 loadDeities();
-                updateCart(); // Sync UI with loaded cart
+                updateCart(); // Restore cart UI on load
             }
         });
 
@@ -70,7 +69,7 @@
             catch { alert("Login failed"); }
         };
 
-        window.handleLogout = () => confirm("Logout from Portal?") && signOut(auth);
+        window.handleLogout = () => confirm("Logout?") && signOut(auth);
         window.togglePassword = () => password.type = password.type === "password" ? "text" : "password";
 
         window.updateNameAndFetchML = async val => {
@@ -118,13 +117,12 @@
             });
         }
 
-        // ✅ PERSISTENT CART UPDATE
         function updateCart() {
             const total = cart.reduce((s, i) => s + i.price, 0);
             cartTotal.innerText = total;
             mobileTotalDisplay.innerText = total;
-
-            // Save to local storage so it doesn't empty on refresh
+            
+            // ✅ 2. SAVE TO STORAGE (Persistence)
             localStorage.setItem('temple_cart', JSON.stringify(cart));
 
             const html = cart.map((i, idx) => `
@@ -146,6 +144,18 @@
         window.removeFromCart = i => { cart.splice(i, 1); updateCart(); };
         window.toggleMobileCart = () => mobileCartOverlay.classList.toggle("hidden");
 
+        // ✅ 3. MANUAL RESET FUNCTION (Called only when YOU click "Next Devotee")
+        window.startNewBill = () => {
+            cart = [];
+            localStorage.removeItem('temple_cart');
+            autoMalayalamName = "";
+            devoteeName.value = "";
+            updateCart();
+            document.getElementById('successOverlay').classList.add('hidden');
+            if (!mobileCartOverlay.classList.contains('hidden')) toggleMobileCart();
+            isProcessing = false;
+        };
+
         window.processBill = async e => {
             if (e) e.preventDefault();
             if (isProcessing) return;
@@ -160,11 +170,8 @@
 
             try {
                 await addDoc(collection(db, "bookings"), {
-                    devoteeName: dName,
-                    devoteeNameMl: mName,
-                    star: dStar,
-                    items, total,
-                    timestamp: serverTimestamp()
+                    devoteeName: dName, devoteeNameMl: mName, star: dStar,
+                    items, total, timestamp: serverTimestamp()
                 });
 
                 const receipt = `
@@ -197,14 +204,8 @@
                     </div>`;
 
                 const frame = document.createElement("iframe");
-                frame.style.position = "fixed";
-                frame.style.bottom = "0";
-                frame.style.right = "0";
-                frame.style.width = "0";
-                frame.style.height = "0";
-                frame.style.border = "none";
+                frame.style.position = "fixed"; frame.style.bottom = "0"; frame.style.right = "0"; frame.style.width = "0"; frame.style.height = "0"; frame.style.border = "none";
                 document.body.appendChild(frame);
-
                 const frameDoc = frame.contentDocument || frame.contentWindow.document;
                 frameDoc.open();
                 frameDoc.write('<html><body style="margin:0;">' + receipt + '</body></html>');
@@ -214,18 +215,11 @@
                     frame.contentWindow.focus();
                     frame.contentWindow.print();
                     
+                    // ✅ 4. SHOW SUCCESS OVERLAY INSTEAD OF AUTO-DELETING
                     setTimeout(() => {
                         if (document.body.contains(frame)) document.body.removeChild(frame);
-                        
-                        // ✅ CLEAR CART ONLY AFTER SUCCESSFUL PRINT TRIGGER
-                        cart = [];
-                        localStorage.removeItem('temple_cart');
-                        autoMalayalamName = "";
-                        devoteeName.value = "";
-                        updateCart();
-                        if (!mobileCartOverlay.classList.contains('hidden')) toggleMobileCart();
-                        isProcessing = false;
-                    }, 2000);
+                        document.getElementById('successOverlay').classList.remove('hidden'); // Show "Next Devotee" button
+                    }, 1000);
                 }, 500);
 
             } catch (err) {
@@ -314,8 +308,16 @@
             <div id="cartItemsMobile" class="flex-1 overflow-y-auto custom-scroll pr-2"></div>
             <button onclick="processBill(event)" class="w-full bg-orange-600 text-white font-black py-5 rounded-2xl mt-6 shadow-xl uppercase tracking-widest">Confirm & Print</button>
         </div>
+        
+        <div id="successOverlay" class="fixed inset-0 bg-slate-900/90 z-[200] hidden flex items-center justify-center p-4">
+            <div class="bg-white w-full max-w-sm p-8 rounded-[2rem] text-center shadow-2xl">
+                <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-sm">✓</div>
+                <h2 class="text-2xl font-black text-slate-800 mb-2">Vazhipadu Saved!</h2>
+                <p class="text-slate-500 font-bold mb-8">Receipt sent to printer.</p>
+                <button onclick="startNewBill()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-[1.02] transition-transform">Start Next Devotee</button>
+            </div>
+        </div>
     </main>
 </div>
 </body>
 </html>
-
