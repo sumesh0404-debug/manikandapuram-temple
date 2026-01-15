@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manikandapuram Sree Dharmasastha Temple Billing & Management Portal</title>
+    <title>Manikandapuram Sree Dharmasastha Temple Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -25,6 +25,7 @@
         
         let cart = [];
         let autoMalayalamName = "";
+        let isProcessing = false;
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -58,7 +59,7 @@
             pwd.type = pwd.type === "password" ? "text" : "password";
         };
 
-        window.handleLogout = () => { if(confirm("Logout from Portal?")) signOut(auth); };
+        window.handleLogout = () => { if(confirm("Logout?")) signOut(auth); };
 
         async function loadDeities() {
             const snap = await getDocs(collection(db, "deities"));
@@ -66,7 +67,7 @@
             container.innerHTML = '';
             snap.forEach(doc => {
                 const btn = document.createElement('button');
-                btn.className = "px-5 py-2 rounded-full border border-orange-200 bg-white text-orange-900 font-bold hover:bg-orange-600 hover:text-white transition-all text-xs uppercase shadow-sm whitespace-nowrap";
+                btn.className = "px-5 py-2 rounded-full border border-orange-200 bg-white text-orange-900 font-bold hover:bg-orange-600 hover:text-white transition-all text-xs uppercase whitespace-nowrap";
                 btn.innerText = doc.data().name;
                 btn.onclick = () => filterPoojas(doc.data().name, btn);
                 container.appendChild(btn);
@@ -111,72 +112,100 @@
         window.removeFromCart = (i) => { cart.splice(i, 1); updateCartUI(); event.stopPropagation(); };
         window.toggleMobileCart = () => document.getElementById('mobileCartOverlay').classList.toggle('hidden');
 
+        // ✅ THE THERMAL PRINTING ENGINE (Popup Strategy)
         window.processBill = async (e) => {
             if (e) e.preventDefault();
+            if (isProcessing) return;
+            
             const nameEn = document.getElementById('devoteeName').value;
             const star = document.getElementById('devoteeStar').value;
-            if(!nameEn || cart.length === 0) return alert("Enter Name & select Poojas");
+            
+            if(!nameEn || cart.length === 0) return alert("Please enter Devotee Name & select Poojas");
 
+            isProcessing = true;
             const finalTotal = cart.reduce((s,i) => s + i.price, 0);
-            const malName = autoMalayalamName;
-            const currentCart = [...cart];
+            const mName = autoMalayalamName;
+            const itemsToPrint = [...cart];
 
             try {
-                // 1. SAVE TO FIREBASE
+                // 1. Save to Database
                 await addDoc(collection(db, "bookings"), { 
-                    devoteeName: nameEn, devoteeNameMl: malName, star: star, 
-                    items: currentCart, total: finalTotal, timestamp: serverTimestamp() 
+                    devoteeName: nameEn, devoteeNameMl: mName, star: star, 
+                    items: itemsToPrint, total: finalTotal, timestamp: serverTimestamp() 
                 });
 
-                // 2. OPEN PRINT WINDOW (Fixes Mobile Zero Issue)
-                const printWindow = window.open('', '_blank');
-                const receiptHtml = `
-                    <html><head><title>Receipt</title><style>
-                        body { font-family: monospace; width: 58mm; padding: 10px; }
-                        .center { text-align: center; }
-                        .dash { border-top: 1px dashed black; margin: 5px 0; }
-                        .flex { display: flex; justify-content: space-between; }
-                    </style></head><body>
-                        <div class="center">
-                            <strong>MANIKANDAPURAM SREE<br>DHARMASASTATHA TEMPLE</strong><br>
-                            <small>Paravoor, Panapuzha - 670306</small>
-                            <div class="dash"></div><b>VAZHIPADU RECEIPT</b><div class="dash"></div>
-                        </div>
-                        <div style="font-size: 11px;">
-                            <b>Name: ${nameEn} / ${malName}</b><br>
-                            Star: ${star}<br>
-                            Date: ${new Date().toLocaleString('en-IN')}
-                        </div>
-                        <div class="dash"></div>
-                        ${currentCart.map(i => `<div class="flex" style="font-size: 10px; margin-bottom:4px;">
-                            <div><b>${i.name_en}</b><br>${i.name_ml}</div><b>₹${i.price}</b>
-                        </div>`).join('')}
-                        <div class="dash"></div>
-                        <div class="flex" style="font-size: 13px; font-weight:bold;"><span>TOTAL:</span><span>₹${finalTotal}</span></div>
-                        <div class="center" style="margin-top: 15px;"><b>Swami Saranam</b></div>
-                    </body></html>`;
-
-                printWindow.document.write(receiptHtml);
-                printWindow.document.close();
+                // 2. Open Thermal-Ready Popup Window
+                const printWin = window.open('', '_blank', 'width=300,height=600');
                 
-                // 3. TRIGGER PRINT
-                printWindow.onload = () => {
-                    printWindow.print();
-                    printWindow.close();
+                const receiptHtml = `
+                    <html>
+                    <head>
+                        <title>Manikandapuram Receipt</title>
+                        <style>
+                            body { font-family: monospace; width: 58mm; padding: 10px; margin: 0; }
+                            .center { text-align: center; }
+                            .dash { border-top: 1px dashed black; margin: 8px 0; }
+                            .flex { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; }
+                            .total { font-size: 14px; font-weight: bold; margin-top: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="center">
+                            <strong style="font-size: 14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</strong><br>
+                            <small>Paravoor, Panapuzha - 670306</small>
+                            <div class="dash"></div>
+                            <b>VAZHIPADU RECEIPT</b>
+                            <div class="dash"></div>
+                        </div>
+                        <div style="font-size: 12px; line-height: 1.5;">
+                            <b>Name: ${nameEn} / ${mName}</b><br>
+                            <b>Star: ${star}</b><br>
+                            <small>Date: ${new Date().toLocaleString('en-IN')}</small>
+                        </div>
+                        <div class="dash"></div>
+                        ${itemsToPrint.map(i => `
+                            <div class="flex">
+                                <div><b>${i.name_en}</b><br>${i.name_ml}</div>
+                                <b>₹${i.price}</b>
+                            </div>
+                        `).join('')}
+                        <div class="dash"></div>
+                        <div class="flex total">
+                            <span>TOTAL:</span><span>₹${finalTotal}</span>
+                        </div>
+                        <div class="center" style="margin-top: 25px;">
+                            <b>Swami Saranam</b>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                printWin.document.write(receiptHtml);
+                printWin.document.close();
+
+                // 3. Wait for content to load, then trigger print
+                printWin.onload = function() {
+                    printWin.focus();
+                    printWin.print();
+                    printWin.close();
                     
-                    // 4. RESET MAIN SCREEN
+                    // 4. Reset App only after print initiated
                     cart = [];
                     document.getElementById('devoteeName').value = "";
                     updateCartUI();
                     if (!document.getElementById('mobileCartOverlay').classList.contains('hidden')) toggleMobileCart();
+                    isProcessing = false;
                 };
-            } catch (err) { alert("Error: " + err.message); }
+
+            } catch (err) {
+                isProcessing = false;
+                alert("Error: " + err.message);
+            }
         };
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafafb; }
-        .no-print { display: block; }
         @media (max-width: 768px) {
             .mobile-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #111827; color: white; padding: 12px 20px; z-index: 100; display: flex; justify-content: space-between; align-items: center; border-radius: 24px 24px 0 0; }
             .mobile-cart-overlay { position: fixed; bottom: 0; left: 0; right: 0; height: 85vh; background: white; z-index: 110; border-radius: 32px 32px 0 0; padding: 24px; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.4); }
@@ -185,13 +214,13 @@
 </head>
 <body class="h-screen overflow-hidden flex flex-col">
     <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-orange-50 p-6">
-        <div class="bg-white p-10 rounded-[2rem] shadow-2xl w-full max-w-sm text-center">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-xl font-black text-slate-800 uppercase mb-8">Portal Login</h2>
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email" class="w-full bg-slate-50 border p-4 rounded-2xl font-semibold">
-                <div class="relative"><input type="password" id="password" placeholder="Password" class="w-full bg-slate-50 border p-4 rounded-2xl font-semibold">
+                <input type="email" id="email" placeholder="Email" class="w-full bg-slate-50 border p-4 rounded-2xl font-semibold outline-none focus:border-orange-500">
+                <div class="relative"><input type="password" id="password" placeholder="Password" class="w-full bg-slate-50 border p-4 rounded-2xl font-semibold outline-none focus:border-orange-500">
                 <button onclick="togglePassword()" class="absolute right-4 top-4 text-slate-400">👁️</button></div>
-                <button onclick="login()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl">SIGN IN</button>
+                <button onclick="login()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-orange-700 transition-all uppercase text-xs">SIGN IN</button>
             </div>
         </div>
     </div>
@@ -200,40 +229,40 @@
         <header class="bg-white border-b py-4 flex justify-between items-center px-6 md:px-10 shrink-0">
             <div class="flex items-center gap-3"><div class="w-10 h-10 bg-orange-600 rounded-xl text-white flex items-center justify-center font-bold">MSDT</div>
             <h1 class="font-black text-[9px] md:text-lg uppercase">Manikandapuram Temple Portal</h1></div>
-            <div class="flex items-center gap-4"><span id="currentUser" class="hidden md:inline text-xs font-bold text-slate-400"></span>
-            <button onclick="handleLogout()" class="bg-red-50 text-red-500 font-bold text-[10px] px-4 py-2 rounded-full uppercase">Logout</button></div>
+            <div class="flex items-center gap-4"><span id="currentUser" class="hidden md:inline text-xs font-bold text-slate-400 tracking-tight"></span>
+            <button onclick="handleLogout()" class="bg-red-50 text-red-500 font-bold text-[10px] px-4 py-2 rounded-full uppercase border border-red-100">Logout</button></div>
         </header>
 
         <main class="flex flex-1 overflow-hidden relative">
             <div class="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 bg-[#fafafb] pb-24 md:pb-10">
                 <div class="bg-white p-5 rounded-2xl border flex flex-col md:flex-row gap-4">
-                    <div class="flex-1"><label class="text-[9px] font-black uppercase text-slate-300">Devotee Name</label>
-                    <input type="text" id="devoteeName" oninput="updateNameAndFetchML(this.value)" placeholder="Enter Name" class="w-full bg-slate-50 p-3 rounded-xl font-bold"></div>
-                    <div class="flex-1"><label class="text-[9px] font-black uppercase text-slate-300">Nakshatram</label>
-                    <select id="devoteeStar" class="w-full bg-slate-50 p-3 rounded-xl font-bold">
+                    <div class="flex-1 space-y-2"><label class="text-[9px] font-black uppercase text-slate-300 tracking-widest">Devotee Name</label>
+                    <input type="text" id="devoteeName" oninput="updateNameAndFetchML(this.value)" placeholder="Enter Name" class="w-full bg-slate-50 p-3 rounded-xl font-bold outline-none focus:bg-white focus:border-orange-500"></div>
+                    <div class="flex-1 space-y-2"><label class="text-[9px] font-black uppercase text-slate-300 tracking-widest">Nakshatram</label>
+                    <select id="devoteeStar" class="w-full bg-slate-50 p-3 rounded-xl font-bold outline-none focus:bg-white focus:border-orange-500">
                         <option>Ashwati / അശ്വതി</option><option>Bharani / ഭരണി</option><option>Kartika / കാർത്തിക</option><option>Rohini / രോഹിണി</option><option>Makayiram / മകയിരം</option><option>Thiruvathira / തിരുവാതിര</option><option>Punartham / പുണർതം</option><option>Pooyam / പൂയം</option><option>Ayilyam / ആയില്യം</option><option>Makam / മകം</option><option>Pooram / പൂരം</option><option>Uthram / ഉത്രം</option><option>Atham / അത്തം</option><option>Chitra / ചിത്ര</option><option>Chothi / ചോതി</option><option>Vishakham / വിശാഖം</option><option>Anizham / അനിഴം</option><option>Thrikketta / തൃക്കേട്ട</option><option>Moolam / മൂലം</option><option>Pooradam / പൂരാടം</option><option>Uthradam / അത്രാടം</option><option>Thiruvonam / തിരുവോണം</option><option>Avittam / അവിട്ടം</option><option>Chathayam / ചതയം</option><option>Pooruruttathi / പൂരുരുട്ടാതി</option><option>Uthruttathi / ഉത്രട്ടാതി</option><option>Revathi / രേവതി</option>
                     </select></div>
                 </div>
-                <div id="deityTabs" class="flex gap-2 overflow-x-auto pb-2"></div>
+                <div id="deityTabs" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide"></div>
                 <div id="poojaCards" class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"></div>
             </div>
 
             <div class="hidden md:flex w-96 bg-white border-l flex-col p-8">
                 <div class="mb-8 font-black text-2xl truncate" id="cartDevoteeName">Devotee Name</div>
                 <div class="flex-1 overflow-y-auto" id="cartItems"></div>
-                <div class="pt-6 border-t flex justify-between items-end mb-6"><span class="text-slate-300 text-[9px] font-black uppercase">Total</span><span class="text-4xl font-black text-orange-600">₹<span id="cartTotal">0</span></span></div>
-                <button onclick="processBill(event)" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl uppercase text-[10px]">Save & Print</button>
+                <div class="pt-6 border-t flex justify-between items-end mb-6"><span class="text-slate-300 text-[9px] font-black uppercase">Grand Total</span><span class="text-4xl font-black text-orange-600">₹<span id="cartTotal">0</span></span></div>
+                <button onclick="processBill(event)" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-widest">Save & Print</button>
             </div>
 
             <div class="md:hidden mobile-bottom-bar" onclick="toggleMobileCart()">
-                <div class="flex flex-col"><span class="text-[10px] text-slate-400">Total</span><span class="text-xl font-black text-orange-400">₹<span id="mobileTotalDisplay">0</span></span></div>
-                <button onclick="processBill(event); event.stopPropagation();" class="bg-orange-600 text-white font-black px-6 py-3 rounded-xl text-xs uppercase">SAVE & PRINT</button>
+                <div class="flex flex-col"><span class="text-[10px] text-slate-400 uppercase tracking-widest leading-none">View Bill</span><span class="text-xl font-black text-orange-400">₹<span id="mobileTotalDisplay">0</span></span></div>
+                <button onclick="processBill(event); event.stopPropagation();" class="bg-orange-600 text-white font-black px-6 py-3 rounded-xl text-xs uppercase shadow-lg shadow-orange-900/20">SAVE & PRINT</button>
             </div>
 
             <div id="mobileCartOverlay" class="md:hidden hidden mobile-cart-overlay">
-                <div class="flex justify-between items-center mb-6"><h3 class="font-black uppercase">Current Bill</h3><button onclick="toggleMobileCart()" class="bg-slate-100 p-2 rounded-full">✕</button></div>
+                <div class="flex justify-between items-center mb-6"><h3 class="font-black uppercase tracking-tight">Your Receipt</h3><button onclick="toggleMobileCart()" class="bg-slate-100 p-2 rounded-full font-black text-slate-400">✕</button></div>
                 <div class="flex-1 overflow-y-auto" id="cartItemsMobile"></div>
-                <button onclick="processBill(event)" class="w-full bg-orange-600 text-white font-black py-5 rounded-2xl mt-4 uppercase">Confirm & Print</button>
+                <button onclick="processBill(event)" class="w-full bg-orange-600 text-white font-black py-5 rounded-2xl mt-4 uppercase tracking-widest">Confirm & Print</button>
             </div>
         </main>
     </div>
