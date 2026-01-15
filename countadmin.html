@@ -47,7 +47,6 @@
             }
         });
 
-        // ✅ Attach to window to fix "ReferenceError"
         window.login = async () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -123,7 +122,7 @@
             localStorage.removeItem('temple_cart'); 
             autoMalayalamName = ""; 
             document.getElementById('devoteeName').value = ""; 
-            document.getElementById('cartDevoteeName').innerText = "Devotee Name"; // Sidebar Reset
+            document.getElementById('cartDevoteeName').innerText = "Devotee Name"; 
             updateCart(); 
             document.getElementById('successOverlay').classList.add('hidden'); 
             if (!document.getElementById('mobileCartOverlay').classList.contains('hidden')) toggleMobileCart(); 
@@ -144,18 +143,48 @@
             try {
                 await addDoc(collection(db, "bookings"), { devoteeName: dName, devoteeNameMl: mName, star: dStar, items, total, timestamp: serverTimestamp() });
 
+                // ✅ 1. CSS FIXED: Added <style media="print"> to hide buttons
                 const receiptHtml = `
-                    <div style="width: 58mm; font-family: monospace; padding: 10px; background: white; color: black; margin: auto;">
-                        <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        <div style="font-size:12px;"><b>Name:</b> ${dName} / ${mName}<br><b>Star:</b> ${dStar}<br><b>Date:</b> ${new Date().toLocaleString('en-IN')}</div>
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        ${items.map((i, index) => `<div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;"><div><span>${index + 1}. </span><b>${i.name_en}</b><br><span style="font-size:10px;">${i.name_ml}</span></div><b>₹${i.price}</b></div>`).join("")}
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;"><span>TOTAL:</span><span>₹${total}</span></div>
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        <center><br><b>Swami Saranam</b></center>
-                    </div>`;
+                    <html>
+                    <head>
+                        <style>
+                            body { margin: 0; padding: 20px; font-family: monospace; display: flex; flex-direction: column; align-items: center; }
+                            .receipt { width: 58mm; color: black; background: white; }
+                            center { text-align: center; }
+                            .dash { border-top: 1px dashed #000; margin: 10px 0; }
+                            .flex { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; }
+                            
+                            /* 🔥 CRITICAL FIX: Hide buttons when actual printing happens */
+                            @media print {
+                                .no-print { display: none !important; }
+                                body { padding: 0; }
+                            }
+                            
+                            .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+                            .btn { padding: 15px 30px; color: white; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; font-family: sans-serif; font-size: 14px; }
+                            .btn-print { background: black; }
+                            .btn-close { background: #ef4444; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="receipt">
+                            <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
+                            <div class="dash"></div>
+                            <div style="font-size:12px;"><b>Name:</b> ${dName} / ${mName}<br><b>Star:</b> ${dStar}<br><b>Date:</b> ${new Date().toLocaleString('en-IN')}</div>
+                            <div class="dash"></div>
+                            ${items.map((i, index) => `<div class="flex"><div style="display:flex; gap:5px;"><span>${index + 1}.</span><div><b>${i.name_en}</b><br><span style="font-size:10px;">${i.name_ml}</span></div></div><b>₹${i.price}</b></div>`).join("")}
+                            <div class="dash"></div>
+                            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;"><span>TOTAL:</span><span>₹${total}</span></div>
+                            <div class="dash"></div>
+                            <center><br><b>Swami Saranam</b></center>
+                        </div>
+
+                        <div class="btn-group no-print">
+                            <button id="printBtn" class="btn btn-print">CLICK TO PRINT / SAVE PDF</button>
+                            <button id="closeBtn" class="btn btn-close">CLOSE</button>
+                        </div>
+                    </body>
+                    </html>`;
 
                 const frame = document.createElement("iframe");
                 frame.id = "printFrame";
@@ -166,26 +195,25 @@
 
                 const frameDoc = frame.contentDocument || frame.contentWindow.document;
                 frameDoc.open();
-                // ✅ Escaped syntax to fix line 148 error
-                frameDoc.write('<html><body style="margin:0; display:flex; flex-direction:column; align-items:center; padding-top:20px;">' + 
-                    receiptHtml + 
-                    '<div style="margin-top:20px; display:flex; gap:10px;">' +
-                    '<button id="printBtn" style="padding:15px 30px; background:black; color:white; border-radius:10px; font-weight:bold; border:none; cursor:pointer;">CLICK TO PRINT / SAVE PDF</button>' +
-                    '<button id="closeBtn" style="padding:15px 30px; background:#ef4444; color:white; border-radius:10px; font-weight:bold; border:none; cursor:pointer;">CLOSE</button>' +
-                    '</div>' +
-                    '<script>' +
-                    'document.getElementById("printBtn").onclick = function(){ window.print(); };' +
-                    'document.getElementById("closeBtn").onclick = function(){ parent.postMessage("close-print", "*"); };' +
-                    '<\/script></body></html>');
+                frameDoc.write(receiptHtml);
                 frameDoc.close();
 
-                window.addEventListener('message', function(e) {
-                    if (e.data === 'close-print') {
-                        const pf = document.getElementById('printFrame');
-                        if (pf) document.body.removeChild(pf);
+                // ✅ 3. MOBILE FIX: Attach event listeners AFTER write to ensure they work
+                frame.onload = function() {
+                    const printBtn = frameDoc.getElementById('printBtn');
+                    const closeBtn = frameDoc.getElementById('closeBtn');
+
+                    // Force print call on the iframe window directly
+                    printBtn.onclick = function() { 
+                        frame.contentWindow.focus(); // Crucial for mobile
+                        frame.contentWindow.print(); 
+                    };
+
+                    closeBtn.onclick = function() {
+                        document.body.removeChild(frame);
                         document.getElementById('successOverlay').classList.remove('hidden');
-                    }
-                }, { once: true });
+                    };
+                };
 
             } catch (err) { alert("Error: " + err.message); isProcessing = false; }
         };
@@ -217,10 +245,11 @@
                         </div>
                     </div>
                     <div class="pt-2">
-                        <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-2xl hover:bg-orange-600 active:scale-[0.98] transition-all uppercase tracking-widest text-[11px]">Authorize & Sign In</button>
+                        <button onclick="login()" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-2xl shadow-slate-200 hover:bg-orange-600 hover:shadow-orange-200 active:scale-[0.98] transition-all uppercase tracking-widest text-[11px]">Authorize & Sign In</button>
                     </div>
                 </div>
             </div>
+            <p class="text-center mt-10 text-slate-300 text-[10px] font-bold uppercase tracking-widest">© 2026 MSDT Systems • Secure Access Only</p>
         </div>
     </div>
 
