@@ -35,7 +35,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, query, where, or, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, serverTimestamp, or } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBhzXyGNLYDDzQjA1w8NJ9NvyxAqv2onNY",
@@ -140,71 +140,96 @@
         window.removeFromCart = i => { cart.splice(i, 1); updateCart(); };
         window.toggleMobileCart = () => mobileCartOverlay.classList.toggle("hidden");
 
+        // ✅ MOBILE-SAFE FOCUSED PRINT ENGINE
         window.processBill = async e => {
-            e?.preventDefault();
+            if (e) e.preventDefault();
             if (isProcessing) return;
             if (!devoteeName.value || cart.length === 0) return alert("Please enter name and select poojas");
 
             isProcessing = true;
             const items = JSON.parse(JSON.stringify(cart));
             const total = items.reduce((s, i) => s + i.price, 0);
+            const mName = autoMalayalamName;
+            const dName = devoteeName.value;
+            const dStar = devoteeStar.value;
 
-            await addDoc(collection(db, "bookings"), {
-                devoteeName: devoteeName.value,
-                devoteeNameMl: autoMalayalamName,
-                star: devoteeStar.value,
-                items, total,
-                timestamp: serverTimestamp()
-            });
+            try {
+                // 1. Save to Database
+                await addDoc(collection(db, "bookings"), {
+                    devoteeName: dName,
+                    devoteeNameMl: mName,
+                    star: dStar,
+                    items, total,
+                    timestamp: serverTimestamp()
+                });
 
-            const receipt = `
-                <div style="width:58mm; font-family:monospace; padding:10px; color:black;">
-                    <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
-                    <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                    <div style="font-size:12px;">
-                        <b>Name:</b> ${devoteeName.value} / ${autoMalayalamName}<br>
-                        <b>Star:</b> ${devoteeStar.value}<br>
-                        <b>Date:</b> ${new Date().toLocaleString('en-IN')}
-                    </div>
-                    <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                    ${items.map((i, index) => `
-                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px; align-items: flex-start;">
-                            <div style="display:flex; gap:5px;">
-                                <span>${index + 1}.</span>
-                                <div>
-                                    <b>${i.name_en}</b><br>
-                                    <span style="font-size:10px;">${i.name_ml}</span>
+                // 2. Build the Receipt with numbering and bilingual poojas
+                const receipt = `
+                    <div style="width:58mm; font-family:monospace; padding:10px; color:black;">
+                        <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
+                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
+                        <div style="font-size:12px;">
+                            <b>Name:</b> ${dName} / ${mName}<br>
+                            <b>Star:</b> ${dStar}<br>
+                            <b>Date:</b> ${new Date().toLocaleString('en-IN')}
+                        </div>
+                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
+                        ${items.map((i, index) => `
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px; align-items: flex-start;">
+                                <div style="display:flex; gap:5px;">
+                                    <span>${index + 1}.</span>
+                                    <div>
+                                        <b>${i.name_en}</b><br>
+                                        <span style="font-size:10px;">${i.name_ml}</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <b>₹${i.price}</b>
-                        </div>`).join("")}
-                    <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
-                        <span>TOTAL:</span><span>₹${total}</span>
-                    </div>
-                    <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                    <center><br><b>Swami Saranam</b></center>
-                </div>`;
+                                <b>₹${i.price}</b>
+                            </div>`).join("")}
+                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
+                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
+                            <span>TOTAL:</span><span>₹${total}</span>
+                        </div>
+                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
+                        <center><br><b>Swami Saranam</b></center>
+                    </div>`;
 
-            const frame = document.createElement("iframe");
-            frame.style.display = "none";
-            document.body.appendChild(frame);
-            frame.contentDocument.write(`<html><body onload="window.print()">${receipt}</body></html>`);
-            frame.contentDocument.close();
-            
-            frame.contentWindow.addEventListener('afterprint', () => {
-                document.body.removeChild(frame);
-            });
+                // 3. Create and append iframe
+                const frame = document.createElement("iframe");
+                frame.style.position = "fixed";
+                frame.style.bottom = "0";
+                frame.style.right = "0";
+                frame.style.width = "0";
+                frame.style.height = "0";
+                frame.style.border = "none";
+                document.body.appendChild(frame);
+
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                frameDoc.open();
+                frameDoc.write('<html><body style="margin:0;">' + receipt + '</body></html>');
+                frameDoc.close();
+
+                // 4. Force Focus and Print (Fixes mobile "nothing happens" issue)
+                setTimeout(() => {
+                    frame.contentWindow.focus();
+                    frame.contentWindow.print();
+                    
+                    // 5. App Reset with sufficient delay for system handover
+                    setTimeout(() => {
+                        if (document.body.contains(frame)) document.body.removeChild(frame);
+                        cart = [];
+                        autoMalayalamName = "";
+                        devoteeName.value = "";
+                        updateCart();
+                        if (!mobileCartOverlay.classList.contains('hidden')) toggleMobileCart();
+                        isProcessing = false;
+                    }, 1500);
+                }, 500);
+
+            } catch (err) {
+                alert("Error: " + err.message);
+                isProcessing = false;
+            }
         };
-
-        window.addEventListener("afterprint", () => {
-            cart = [];
-            autoMalayalamName = "";
-            devoteeName.value = "";
-            updateCart();
-            mobileCartOverlay.classList.add("hidden");
-            isProcessing = false;
-        });
     </script>
 </head>
 
@@ -270,7 +295,7 @@
             </div>
         </div>
 
-        <div class="mobile-bottom-bar md:hidden no-print" onclick="toggleMobileCart()">
+        <div class="mobile-bottom-bar md:hidden" onclick="toggleMobileCart()">
             <div class="flex flex-col">
                 <span class="text-[10px] font-bold text-slate-400 uppercase leading-none mb-1">Grand Total</span>
                 <span class="text-xl font-black text-orange-400 leading-none">₹<span id="mobileTotalDisplay">0</span></span>
