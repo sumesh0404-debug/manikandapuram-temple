@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manikandapuram Sree Dharmasastha Temple Portal</title>
+    <title>Manikandapuram Sree Dharmasastha Temple Billing & Management Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -58,7 +58,7 @@
             pwd.type = pwd.type === "password" ? "text" : "password";
         };
 
-        window.handleLogout = () => { if(confirm("Logout?")) signOut(auth); };
+        window.handleLogout = () => { if(confirm("Logout from Portal?")) signOut(auth); };
 
         async function loadDeities() {
             const snap = await getDocs(collection(db, "deities"));
@@ -102,6 +102,7 @@
             const container = document.getElementById('cartItems');
             const mobileContainer = document.getElementById('cartItemsMobile');
             const total = cart.reduce((s,i) => s + i.price, 0);
+            
             document.getElementById('cartTotal').innerText = total;
             document.getElementById('mobileTotalDisplay').innerText = total;
 
@@ -126,30 +127,33 @@
         window.processBill = async () => {
             const nameEn = document.getElementById('devoteeName').value;
             const star = document.getElementById('devoteeStar').value;
+            
             if(!nameEn || cart.length === 0) return alert("Enter Name & Poojas");
 
-            // 1. Prepare Print Data first
+            // Fix: Calculate final total directly from current cart array
+            const finalTotal = cart.reduce((s,i) => s + i.price, 0);
+
+            // Populate Receipt
             document.getElementById('printNameCombo').innerText = `${nameEn} / ${autoMalayalamName}`;
             document.getElementById('printStar').innerText = star;
             document.getElementById('printDate').innerText = new Date().toLocaleString('en-IN');
-            document.getElementById('printTotal').innerText = cart.reduce((s,i)=>s+i.price,0);
+            document.getElementById('printTotal').innerText = finalTotal;
             document.getElementById('printItems').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px;"><div><b>${i.name_en}</b><br>${i.name_ml}</div><div style="font-weight:bold;">₹${i.price}</div></div>`).join('');
 
-            // 2. Save to Database
             try {
+                // Save to Firebase
                 await addDoc(collection(db, "bookings"), { 
                     devoteeName: nameEn, 
                     devoteeNameMl: autoMalayalamName, 
                     star: star, 
                     items: cart, 
-                    total: cart.reduce((s,i)=>s+i.price,0), 
+                    total: finalTotal, 
                     timestamp: serverTimestamp() 
                 });
                 
-                // 3. Trigger Print
                 window.print();
                 
-                // 4. Reset
+                // Clear state
                 cart = [];
                 document.getElementById('devoteeName').value = "";
                 updateCartUI();
@@ -178,10 +182,10 @@
         <div class="bg-white p-10 rounded-[2rem] shadow-2xl w-full max-w-sm border border-orange-100 text-center">
             <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-8">Portal Login</h2>
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Email" class="w-full bg-slate-50 border p-4 rounded-2xl outline-none focus:border-orange-500">
-                <div class="relative"><input type="password" id="password" placeholder="Password" class="w-full bg-slate-50 border p-4 rounded-2xl outline-none focus:border-orange-500">
+                <input type="email" id="email" placeholder="Email" class="w-full bg-slate-50 border p-4 rounded-2xl outline-none focus:border-orange-500 font-semibold">
+                <div class="relative"><input type="password" id="password" placeholder="Password" class="w-full bg-slate-50 border p-4 rounded-2xl outline-none focus:border-orange-500 font-semibold">
                 <button type="button" onclick="togglePassword()" class="absolute right-4 top-4 text-slate-400">👁️</button></div>
-                <button onclick="login()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-orange-700">SIGN IN</button>
+                <button onclick="login()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-orange-700 transition-all uppercase tracking-widest text-xs">SIGN IN</button>
             </div>
         </div>
     </div>
@@ -199,12 +203,12 @@
         </header>
 
         <main class="flex flex-1 overflow-hidden relative">
-            <div class="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 md:space-y-8 custom-scroll pb-24 md:pb-10">
+            <div class="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 md:space-y-8 bg-[#fafafb] custom-scroll pb-24 md:pb-10">
                 <div class="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4">
-                    <div class="flex-1"><label class="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Devotee Name</label>
-                    <input type="text" id="devoteeName" oninput="updateNameAndFetchML(this.value)" placeholder="English Name" class="w-full bg-slate-50 border border-transparent p-3 rounded-xl focus:bg-white focus:border-orange-500 outline-none font-bold"></div>
-                    <div class="flex-1"><label class="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Nakshatram</label>
-                    <select id="devoteeStar" class="w-full bg-slate-50 border border-transparent p-3 rounded-xl outline-none focus:bg-white focus:border-orange-500 font-bold">
+                    <div class="flex-1 space-y-2"><label class="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Devotee Name</label>
+                    <input type="text" id="devoteeName" oninput="updateNameAndFetchML(this.value)" placeholder="English Name" class="w-full bg-slate-50 border border-transparent p-3 rounded-xl focus:bg-white focus:border-orange-500 outline-none font-bold text-slate-700"></div>
+                    <div class="flex-1 space-y-2"><label class="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Nakshatram</label>
+                    <select id="devoteeStar" class="w-full bg-slate-50 border border-transparent p-3 rounded-xl outline-none focus:bg-white focus:border-orange-500 font-bold text-slate-700">
                         <option>Ashwati / അശ്വതി</option><option>Bharani / ഭരണി</option><option>Kartika / കാർത്തിക</option><option>Rohini / രോഹിണി</option><option>Makayiram / മകയിരം</option><option>Thiruvathira / തിരുവാതിര</option><option>Punartham / പുണർതം</option><option>Pooyam / പൂയം</option><option>Ayilyam / ആയില്യം</option><option>Makam / മകം</option><option>Pooram / പൂരം</option><option>Uthram / ഉത്രം</option><option>Atham / അത്തം</option><option>Chitra / ചിത്ര</option><option>Chothi / ചോതി</option><option>Vishakham / വിശാഖം</option><option>Anizham / അനിഴം</option><option>Thrikketta / തൃക്കേട്ട</option><option>Moolam / മൂലം</option><option>Pooradam / പൂരാടം</option><option>Uthradam / ഉത്രാടം</option><option>Thiruvonam / തിരുവോണം</option><option>Avittam / അവിട്ടം</option><option>Chathayam / ചതയം</option><option>Pooruruttathi / പൂരുരുട്ടാതി</option><option>Uthruttathi / ഉത്രട്ടാതി</option><option>Revathi / രേവതി</option>
                     </select></div>
                 </div>
@@ -232,7 +236,7 @@
 
             <div id="mobileCartOverlay" class="md:hidden hidden mobile-cart-overlay no-print">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-black text-slate-800 uppercase text-lg">Your Bill</h3>
+                    <h3 class="font-black text-slate-800 uppercase text-lg">Current Bill</h3>
                     <button onclick="toggleMobileCart()" class="bg-slate-100 p-2 rounded-full text-slate-400 font-bold">✕</button>
                 </div>
                 <div class="flex-1 overflow-y-auto" id="cartItemsMobile"></div>
