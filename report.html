@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Manikandapuram Temple Desk</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #c2410c; 
+            --primary-light: #fff7ed;
+            --secondary: #1e293b; 
+            --bg-body: #f1f5f9; 
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll, use inner scroll */
+        }
+
+        /* --- 1. LOGIN --- */
+        #login-view {
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 20px;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.95); padding: 40px 30px; border-radius: 24px;
+            width: 100%; max-width: 380px; box-shadow: var(--shadow-md); text-align: center;
+        }
+        .login-icon {
+            width: 60px; height: 60px; background: var(--primary-light); color: var(--primary);
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            font-size: 26px; margin: 0 auto 20px auto;
+        }
+        .styled-input {
+            width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 12px;
+            font-size: 16px; margin-bottom: 15px; box-sizing: border-box; background: #f8fafc;
+        }
+        .btn-login {
+            width: 100%; padding: 14px; background: var(--primary); color: white;
+            border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px;
+        }
+        .error-msg { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
+
+        /* --- 2. DASHBOARD --- */
+        #dashboard-view { display: none; height: 100vh; position: relative; }
+
+        /* SIDEBAR (Desktop Default) */
+        .sidebar {
+            width: 260px; background: var(--surface); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 24px; z-index: 50;
+            transition: transform 0.3s ease;
+        }
+        .logo-area { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+        .logo-box { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: var(--text-muted); cursor: pointer; font-weight: 500; margin-bottom: 4px; }
+        .nav-link.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .nav-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1; padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px;
+            background: var(--bg-body); position: relative;
+        }
+        
+        /* HEADER with Hamburger */
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .page-title h1 { margin: 0; font-size: 24px; font-weight: 700; }
+        .menu-btn { display: none; font-size: 20px; cursor: pointer; padding: 8px; background: white; border-radius: 8px; border: 1px solid var(--border); }
+
+        /* GRID: Responsive */
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr 1.8fr; gap: 20px; }
+        
+        .stat-card {
+            background: var(--surface); padding: 20px; border-radius: 16px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; gap: 8px; justify-content: center;
+        }
+        .stat-icon {
+            width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 26px; font-weight: 700; color: var(--text-main); }
+
+        .chart-card {
+            background: var(--surface); padding: 20px; border-radius: 16px;
+            border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+            display: flex; align-items: center; gap: 20px;
+        }
+        .chart-container { height: 140px; width: 140px; flex-shrink: 0; }
+        .chart-legend { flex: 1; font-size: 12px; color: var(--text-muted); }
+
+        /* FILTER & TABLE */
+        .control-panel {
+            background: var(--surface); padding: 16px; border-radius: 16px; border: 1px solid var(--border);
+            display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; box-shadow: var(--shadow-sm);
+        }
+        .date-input-group { flex: 1; min-width: 120px; }
+        .date-input-group label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+        .date-input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; background: #f8fafc; box-sizing: border-box;}
+
+        .action-btn {
+            padding: 10px 16px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; font-size: 13px; height: 40px;
+        }
+        .btn-primary { background: var(--secondary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text-main); margin-left: auto; }
+
+        .table-wrapper {
+            background: var(--surface); border-radius: 16px; border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm); overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 300px;
+        }
+        .table-scroll { overflow-y: auto; flex: 1; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; } /* Ensure table scrolls on mobile */
+        thead th { background: #f8fafc; padding: 14px 20px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+        tbody td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 500; }
+        .loader-overlay { display: none; padding: 40px; text-align: center; color: var(--text-muted); }
+
+        /* --- MOBILE OPTIMIZATIONS --- */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute; left: 0; top: 0; bottom: 0;
+                transform: translateX(-100%); /* Hide Sidebar */
+                box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+            }
+            .sidebar.open { transform: translateX(0); } /* Show Sidebar */
+            
+            .menu-btn { display: block; } /* Show Hamburger */
+            .main-content { padding: 16px; width: 100%; }
+            
+            .analytics-grid { grid-template-columns: 1fr; gap: 16px; } /* Stack Grid */
+            
+            .chart-card { flex-direction: column; text-align: center; } /* Stack Chart */
+            .chart-legend { width: 100%; text-align: left; margin-top: 15px; }
+            
+            .control-panel { flex-direction: column; align-items: stretch; }
+            .btn-outline { margin-left: 0; margin-top: 10px; }
+            
+            .page-title h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-view">
+        <div class="login-card">
+            <div class="login-icon"><i class="fa-solid fa-om"></i></div>
+            <h2 style="margin-top:0;">Manikandapuram<br>Temple Desk</h2>
+            <input type="email" id="email" class="styled-input" placeholder="admin@temple.com">
+            <input type="password" id="password" class="styled-input" placeholder="••••••••">
+            <p id="loginError" class="error-msg"></p>
+            <button class="btn-login" onclick="login()">Sign In</button>
+        </div>
+    </div>
+
+    <div id="dashboard-view">
+        
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-area">
+                <div class="logo-box"><i class="fa-solid fa-om"></i></div>
+                <div style="font-weight: 700; font-size: 18px;">Temple Desk</div>
+                <i class="fa-solid fa-xmark" onclick="toggleSidebar()" style="margin-left:auto; cursor:pointer; display:none;" id="closeSidebarBtn"></i>
+            </div>
+            <div class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Financials</div>
+            <div class="nav-footer">
+                <div class="nav-link" onclick="logout()" style="color: #ef4444;"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></div>
+                    <div class="page-title">
+                        <h1>Financial Overview</h1>
+                        <p id="reportPeriodDisplay" style="font-size: 12px; margin-top: 2px;">Select date range</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #fff7ed; color: #c2410c;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-value" id="statTotalAmount">0.00</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fa-solid fa-receipt"></i></div>
+                    <div class="stat-label">Transactions</div>
+                    <div class="stat-value" id="statTotalCount">0</div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-container">
+                        <canvas id="poojaChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="chartLegend">
+                        <div style="margin-bottom:5px; font-weight:600;">Top Bookings:</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="date-input-group">
+                    <label>From Date</label>
+                    <input type="date" id="fromDate" class="date-input">
+                </div>
+                <div class="date-input-group">
+                    <label>To Date</label>
+                    <input type="date" id="toDate" class="date-input">
+                </div>
+                <button class="action-btn btn-primary" onclick="fetchData()">
+                    <i class="fa-solid fa-filter"></i> <span style="display: inline-block;">Filter</span>
+                </button>
+                <button class="action-btn btn-outline" onclick="exportToExcel()">
+                    <i class="fa-solid fa-file-excel" style="color: #10b981;"></i> <span>Export</span>
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <div id="loader" class="loader-overlay"><i class="fa-solid fa-circle-notch fa-spin fa-2x"></i><p>Loading...</p></div>
+                <div class="table-scroll">
+                    <table id="reportTable">
+                        <thead>
+                            <tr>
+                                <th>Pooja Name</th>
+                                <th style="text-align: right;">Price</th>
+                                <th style="text-align: right;">Qty</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhzXyGNLYDDzQjA1w8NJ9NvyxAqv2onNY",
+            authDomain: "temple-management-system-9c3c2.firebaseapp.com",
+            projectId: "temple-management-system-9c3c2",
+            storageBucket: "temple-management-system-9c3c2.firebasestorage.app",
+            messagingSenderId: "960683500104",
+            appId: "1:960683500104:web:e9b972349c28b98d7e2e7d"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const COLLECTION_NAME = "bookings"; 
+        let poojaChartInstance = null;
+
+        // --- MOBILE TOGGLE ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('closeSidebarBtn');
+            sidebar.classList.toggle('open');
+            // Show/Hide close button based on state
+            if(window.innerWidth <= 768) {
+                closeBtn.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+            }
+        }
+
+        // --- AUTH ---
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('login-view').style.display = 'none';
+                document.getElementById('dashboard-view').style.display = 'flex';
+                fetchData();
+            } else {
+                document.getElementById('dashboard-view').style.display = 'none';
+                document.getElementById('login-view').style.display = 'flex';
+            }
+        });
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('loginError');
+            if(!email || !pass) { errorMsg.style.display='block'; errorMsg.innerText="Enter credentials"; return; }
+            auth.signInWithEmailAndPassword(email, pass).catch(e => {
+                errorMsg.style.display='block'; errorMsg.innerText=e.message;
+            });
+        }
+        function logout() { auth.signOut(); }
+
+        // --- DATA ---
+        const today = new Date();
+        document.getElementById('toDate').valueAsDate = today;
+        document.getElementById('fromDate').valueAsDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        function fetchData() {
+            // Mobile: Close sidebar if open when fetching
+            document.getElementById('sidebar').classList.remove('open');
+            
+            const fromDateVal = document.getElementById('fromDate').value;
+            const toDateVal = document.getElementById('toDate').value;
+            document.getElementById('reportPeriodDisplay').innerHTML = `Showing: <b>${fromDateVal}</b> to <b>${toDateVal}</b>`;
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('tableBody').innerHTML = '';
+
+            db.collection(COLLECTION_NAME).get().then((querySnapshot) => {
+                processData(querySnapshot, fromDateVal, toDateVal);
+            }).catch((error) => {
+                alert("Connection Error: " + error.message);
+                document.getElementById('loader').style.display = 'none';
+            });
+        }
+
+        function processData(snapshot, fromFilter, toFilter) {
+            const reportMap = {};
+            let grandTotal = 0;
+            let totalReceipts = 0;
+            
+            const fromDateObj = new Date(fromFilter);
+            const toDateObj = new Date(toFilter);
+            toDateObj.setHours(23, 59, 59, 999);
+
+            snapshot.forEach((doc) => {
+                const bill = doc.data();
+                let billDateObj = null;
+
+                if (bill.timestamp && typeof bill.timestamp.toDate === 'function') {
+                    billDateObj = bill.timestamp.toDate();
+                } else if (bill.date) {
+                    billDateObj = new Date(bill.date);
+                }
+
+                if (!billDateObj || isNaN(billDateObj)) return;
+                if (billDateObj < fromDateObj || billDateObj > toDateObj) return;
+
+                if(bill.items && Array.isArray(bill.items)) {
+                    totalReceipts++;
+                    bill.items.forEach(item => {
+                        const name = item.name_en || "Unknown";
+                        const price = parseFloat(item.price) || 0;
+                        const key = name + "_" + price;
+                        if (!reportMap[key]) reportMap[key] = { name, price, count: 0, total: 0 };
+                        
+                        const qty = item.qty || 1;
+                        reportMap[key].count += qty;
+                        reportMap[key].total += (price * qty);
+                        grandTotal += (price * qty);
+                    });
+                }
+            });
+
+            renderUI(reportMap, grandTotal, totalReceipts);
+            updateChart(reportMap);
+        }
+
+        function renderUI(dataMap, grandTotal, totalCount) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('statTotalAmount').innerText = "₹ " + grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+            document.getElementById('statTotalCount').innerText = totalCount;
+            
+            const tbody = document.getElementById('tableBody');
+            const items = Object.values(dataMap);
+
+            if(items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#94a3b8;">No data found.</td></tr>';
+                return;
+            }
+
+            items.forEach(row => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color: var(--text-main); font-weight: 500;">${row.name}</td>
+                        <td style="text-align: right; font-family:monospace; font-weight:600;">${row.price.toFixed(2)}</td>
+                        <td style="text-align: right;">${row.count}</td>
+                        <td style="text-align: right; font-family:monospace; font-weight:700; color:#c2410c;">${row.total.toFixed(2)}</td>
+                    </tr>`;
+            });
+        }
+
+        // --- CHART LOGIC (DOUGHNUT) ---
+        function updateChart(dataMap) {
+            const ctx = document.getElementById('poojaChart').getContext('2d');
+            const sortedItems = Object.values(dataMap).sort((a, b) => b.count - a.count).slice(0, 5);
+            
+            const labels = sortedItems.map(item => item.name);
+            const dataCounts = sortedItems.map(item => item.count);
+
+            const colors = ['#c2410c', '#f59e0b', '#0d9488', '#3b82f6', '#64748b'];
+
+            if (poojaChartInstance) poojaChartInstance.destroy();
+
+            const legendDiv = document.getElementById('chartLegend');
+            legendDiv.innerHTML = '<div style="margin-bottom:8px; font-weight:600;">Top Bookings:</div>';
+            
+            if(sortedItems.length === 0) {
+                legendDiv.innerHTML += '<div style="color:#aaa; font-style:italic;">No data</div>';
+            } else {
+                sortedItems.forEach((item, index) => {
+                    const color = colors[index % colors.length];
+                    legendDiv.innerHTML += `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                            <div style="width:8px; height:8px; border-radius:50%; background:${color};"></div>
+                            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
+                            <div style="font-weight:600;">${item.count}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            poojaChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataCounts,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function exportToExcel() {
+            const table = document.getElementById("reportTable");
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Financials"});
+            const fromD = document.getElementById('fromDate').value;
+            XLSX.writeFile(wb, `Report_${fromD}.xlsx`);
+        }
+    </script>
+</body>
+</html>
