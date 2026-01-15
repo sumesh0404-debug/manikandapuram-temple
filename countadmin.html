@@ -11,12 +11,12 @@
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         
-        /* 🔥 CHROME PRINT FIX: Ensure body scrolls during print */
+        /* PRINT STYLES */
         @media print {
             .no-print { display: none !important; }
             #appScreen, #loginScreen, #successOverlay { display: none !important; }
-            #printSection { display: block !important; background: white; width: 100%; height: auto; position: absolute; top: 0; left: 0; z-index: 9999; }
-            body, html { height: auto !important; overflow: visible !important; }
+            #printSection { display: block !important; background: white; position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 0; z-index: 9999; }
+            body { background: white; height: auto; overflow: visible; }
         }
 
         @media (max-width: 768px) {
@@ -49,10 +49,14 @@
         onAuthStateChanged(auth, user => {
             document.getElementById('loginScreen').classList.toggle('hidden', !!user);
             document.getElementById('appScreen').classList.toggle('hidden', !user);
+            
             if (user) { 
                 document.getElementById('currentUser').innerText = user.email; 
                 loadDeities(); 
                 updateCart(); 
+            } else {
+                cart = [];
+                localStorage.removeItem('temple_cart');
             }
         });
 
@@ -63,8 +67,14 @@
             catch (e) { alert("Authorization failed."); }
         };
 
-        window.handleLogout = () => confirm("Confirm Logout?") && signOut(auth);
-        
+        window.handleLogout = async () => {
+            if(confirm("Confirm Logout?")) {
+                localStorage.removeItem('temple_cart'); 
+                await signOut(auth); 
+                window.location.reload(); 
+            }
+        };
+
         window.togglePassword = () => {
             const pwd = document.getElementById('password');
             pwd.type = pwd.type === "password" ? "text" : "password";
@@ -84,30 +94,75 @@
             const deityTabs = document.getElementById('deityTabs');
             deityTabs.innerHTML = "";
             const snap = await getDocs(collection(db, "deities"));
-            snap.forEach(doc => {
-                const b = document.createElement("button");
-                b.className = "px-6 py-2 rounded-full border-2 border-orange-100 bg-white text-orange-900 font-bold hover:bg-orange-600 hover:text-white transition-all text-xs uppercase shadow-sm whitespace-nowrap";
-                b.innerText = doc.data().name;
-                b.onclick = () => filterPoojas(doc.data().name, b);
-                deityTabs.appendChild(b);
+            let deities = [];
+            snap.forEach(doc => deities.push(doc.data().name));
+
+            const sortOrder = ["Ayyappan", "Ganapathi", "Muthappan", "Devi"];
+            deities.sort((a, b) => {
+                const idxA = sortOrder.indexOf(a);
+                const idxB = sortOrder.indexOf(b);
+                return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
             });
+
+            deities.forEach(name => createTab(name, false));
+            createTab("Special Vazhipadu", true); 
         }
 
-        async function filterPoojas(name, btn) {
+        function createTab(name, isSpecial) {
+            const b = document.createElement("button");
+            const baseClass = "px-6 py-2 rounded-full border-2 font-bold transition-all text-xs uppercase shadow-sm whitespace-nowrap ";
+            b.className = isSpecial 
+                ? baseClass + "border-red-100 bg-red-50 text-red-900 hover:bg-red-600 hover:text-white"
+                : baseClass + "border-orange-100 bg-white text-orange-900 hover:bg-orange-600 hover:text-white";
+            b.innerText = name;
+            b.onclick = () => filterPoojas(name, b, isSpecial);
+            document.getElementById('deityTabs').appendChild(b);
+        }
+
+        async function filterPoojas(name, btn, isSpecial) {
             const deityTabs = document.getElementById('deityTabs');
-            [...deityTabs.children].forEach(b => b.classList.remove("bg-orange-600", "text-white"));
-            btn.classList.add("bg-orange-600", "text-white");
-            const q = query(collection(db, "poojas"), or(where("deity", "==", name), where("diety", "==", name)));
-            const snap = await getDocs(q);
+            [...deityTabs.children].forEach(b => {
+                const isSpec = b.innerText === "Special Vazhipadu";
+                b.className = "px-6 py-2 rounded-full border-2 font-bold transition-all text-xs uppercase shadow-sm whitespace-nowrap " + 
+                              (isSpec ? "border-red-100 bg-red-50 text-red-900" : "border-orange-100 bg-white text-orange-900");
+            });
+
+            btn.className = "px-6 py-2 rounded-full border-2 font-bold transition-all text-xs uppercase shadow-sm whitespace-nowrap text-white " + 
+                            (isSpecial ? "bg-red-600 border-red-600" : "bg-orange-600 border-orange-600");
+
             const poojaCards = document.getElementById('poojaCards');
+            poojaCards.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">Loading...</div>';
+
+            let q;
+            if (isSpecial) {
+                q = query(collection(db, "poojas")); 
+            } else {
+                q = query(collection(db, "poojas"), or(where("deity", "==", name), where("diety", "==", name)));
+            }
+
+            const snap = await getDocs(q);
             poojaCards.innerHTML = "";
             let list = [];
             snap.forEach(d => list.push(d.data()));
+
+            if (isSpecial) {
+                list = list.filter(p => p.price >= 500);
+            } else {
+                list = list.filter(p => p.price < 500);
+            }
+
+            if (list.length === 0) {
+                poojaCards.innerHTML = '<div class="col-span-full text-center py-10 text-slate-300 font-bold">No items in this category</div>';
+                return;
+            }
+
             list.sort((a, b) => a.price - b.price);
             list.forEach(p => {
                 const c = document.createElement('div');
                 c.className = "bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:border-orange-500 cursor-pointer active:scale-95 transition-all";
-                c.innerHTML = `<p class="font-bold text-slate-800 text-sm mb-1 line-clamp-1">${p.name_en}</p><p class="text-[10px] text-orange-600 font-bold uppercase mb-3">${p.name_ml}</p><div class="font-black text-xl text-slate-900">₹${p.price}</div>`;
+                c.innerHTML = `<p class="font-bold text-slate-800 text-sm mb-1 line-clamp-1">${p.name_en}</p>
+                               <p class="text-[10px] text-orange-600 font-bold uppercase mb-3">${p.name_ml}</p>
+                               <div class="font-black text-xl text-slate-900">₹${p.price}</div>`;
                 c.onclick = () => { cart.push(p); updateCart(); };
                 poojaCards.appendChild(c);
             });
@@ -118,7 +173,20 @@
             document.getElementById('cartTotal').innerText = total;
             document.getElementById('mobileTotalDisplay').innerText = total;
             localStorage.setItem('temple_cart', JSON.stringify(cart));
-            const html = cart.map((i, idx) => `<div class="flex justify-between items-center bg-gray-50 p-4 rounded-xl mb-3 border border-slate-100"><div><div class="text-[10px] font-bold text-orange-600 uppercase mb-1">${i.deity || i.diety || ''}</div><div class="text-xs font-black text-slate-700">${i.name_en}</div></div><div class="flex items-center gap-4"><span class="font-black text-slate-900">₹${i.price}</span><button onclick="removeFromCart(${idx})" class="text-slate-300 hover:text-red-500 font-bold text-lg">✕</button></div></div>`).join("");
+            
+            const html = cart.map((i, idx) => `
+                <div class="flex justify-between items-start bg-white p-4 rounded-xl mb-3 border border-slate-100 shadow-sm">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-black text-slate-800 leading-tight">${i.name_en}</span>
+                        <span class="text-xs font-bold text-slate-500 mb-1">${i.name_ml}</span>
+                        <span class="text-[10px] font-bold text-orange-600 uppercase tracking-wider bg-orange-50 px-2 py-1 rounded w-fit">${i.deity || i.diety || ''}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-black text-slate-900 text-lg">₹${i.price}</span>
+                        <button onclick="removeFromCart(${idx})" class="text-slate-300 hover:text-red-500 font-bold text-xl px-2">×</button>
+                    </div>
+                </div>`).join("");
+                
             document.getElementById('cartItems').innerHTML = html;
             document.getElementById('cartItemsMobile').innerHTML = html;
         }
@@ -126,19 +194,15 @@
         window.removeFromCart = i => { cart.splice(i, 1); updateCart(); };
         window.toggleMobileCart = () => document.getElementById('mobileCartOverlay').classList.toggle('hidden');
 
-        // ✅ 1. RESTORE BODY SCROLL ON CLOSE
         window.finishPrint = () => {
             document.getElementById('printSection').classList.add('hidden'); 
             document.getElementById('appScreen').classList.remove('hidden'); 
             document.getElementById('successOverlay').classList.remove('hidden'); 
-            // RESTORE SCROLL
-            document.body.classList.add('overflow-hidden', 'h-screen');
+            document.body.classList.remove('overflow-hidden', 'h-screen');
         };
 
         window.startNewBill = () => {
-            cart = []; 
-            localStorage.removeItem('temple_cart'); 
-            autoMalayalamName = ""; 
+            cart = []; localStorage.removeItem('temple_cart'); autoMalayalamName = ""; 
             document.getElementById('devoteeName').value = ""; 
             document.getElementById('cartDevoteeName').innerText = "Devotee Name"; 
             updateCart(); 
@@ -161,19 +225,30 @@
             try {
                 await addDoc(collection(db, "bookings"), { devoteeName: dName, devoteeNameMl: mName, star: dStar, items, total, timestamp: serverTimestamp() });
 
+                // ✅ UPDATED RECEIPT: Adds Deity in Brackets
                 const receiptHtml = `
                     <div style="width: 58mm; margin: 0 auto; font-family: monospace; color: black; background: white; padding-top: 20px;">
                         <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
                         <div style="border-top:1px dashed #000; margin:10px 0;"></div>
                         <div style="font-size:12px;"><b>Name:</b> ${dName} / ${mName}<br><b>Star:</b> ${dStar}<br><b>Date:</b> ${new Date().toLocaleString('en-IN')}</div>
                         <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        ${items.map((i, index) => `<div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;"><div><span>${index + 1}. </span><b>${i.name_en}</b><br><span style="font-size:10px;">${i.name_ml}</span></div><b>₹${i.price}</b></div>`).join("")}
+                        ${items.map((i, index) => `
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                                <div style="display:flex; gap:5px;">
+                                    <span>${index + 1}.</span>
+                                    <div>
+                                        <b>${i.name_en} <span style="font-weight:normal; font-size:9px;">(${i.deity || i.diety || ''})</span></b>
+                                        <br>
+                                        <span style="font-size:10px;">${i.name_ml}</span>
+                                    </div>
+                                </div>
+                                <b>₹${i.price}</b>
+                            </div>`).join("")}
                         <div style="border-top:1px dashed #000; margin:10px 0;"></div>
                         <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;"><span>TOTAL:</span><span>₹${total}</span></div>
                         <div style="border-top:1px dashed #000; margin:10px 0;"></div>
                         <center><br><b>Swami Saranam</b></center>
                     </div>
-                    
                     <div class="no-print" style="margin-top:40px; display:flex; gap:15px; justify-content:center; flex-direction: column; padding: 20px;">
                         <button onclick="window.print()" style="padding:15px; background:black; color:white; border-radius:12px; font-weight:bold; border:none; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">🖨️ CLICK TO PRINT / SAVE PDF</button>
                         <button onclick="finishPrint()" style="padding:15px; background:#ef4444; color:white; border-radius:12px; font-weight:bold; border:none; font-size: 14px; box-shadow: 0 4px 15px rgba(239,68,68,0.3);">❌ CLOSE & NEXT</button>
@@ -181,11 +256,8 @@
 
                 const printSection = document.getElementById('printSection');
                 printSection.innerHTML = receiptHtml;
-                
                 document.getElementById('appScreen').classList.add('hidden'); 
                 printSection.classList.remove('hidden'); 
-                
-                // ✅ 2. UNLOCK BODY SCROLL (Chrome Fix)
                 document.body.classList.remove('overflow-hidden', 'h-screen');
 
             } catch (err) { alert("Error: " + err.message); isProcessing = false; }
@@ -193,7 +265,6 @@
     </script>
 </head>
 <body class="h-screen overflow-hidden flex flex-col bg-[#fafafb]">
-    
     <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-[#fafafb] p-6">
         <div class="w-full max-w-[450px]">
             <div class="text-center mb-10"><div class="inline-flex items-center justify-center w-16 h-16 bg-orange-600 rounded-2xl shadow-xl shadow-orange-200 mb-6"><span class="text-white font-black text-xl">MSDT</span></div>
@@ -227,14 +298,9 @@
             </div>
             <div class="mobile-bottom-bar md:hidden" onclick="toggleMobileCart()"><span class="text-xl font-black text-orange-400">₹<span id="mobileTotalDisplay">0</span></span><button onclick="processBill(event);event.stopPropagation()" class="bg-orange-600 text-white px-8 py-3 rounded-xl font-black text-xs uppercase shadow-lg shadow-orange-900/30">Save</button></div>
             <div id="mobileCartOverlay" class="mobile-cart-overlay hidden md:hidden"><div class="flex justify-between items-center mb-8"><h3 class="font-black text-slate-800 uppercase text-lg tracking-tight">Vazhipadu Bill</h3><button onclick="toggleMobileCart()">✕</button></div><div id="cartItemsMobile" class="flex-1 overflow-y-auto custom-scroll pr-2"></div><button onclick="processBill(event)" class="w-full bg-orange-600 text-white font-black py-5 rounded-2xl mt-6 shadow-xl uppercase tracking-widest">Confirm & Print</button></div>
-            
             <div id="successOverlay" class="fixed inset-0 bg-slate-900/90 z-[200] hidden flex items-center justify-center p-4"><div class="bg-white w-full max-w-sm p-8 rounded-[2rem] text-center shadow-2xl"><div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-sm">✓</div><h2 class="text-2xl font-black text-slate-800 mb-2">Vazhipadu Saved!</h2><button onclick="startNewBill()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl">Start Next Devotee</button></div></div>
         </main>
     </div>
-
-    <div id="printSection" class="hidden">
-        </div>
-
+    <div id="printSection" class="hidden h-screen w-full bg-white flex-col items-center pt-10"></div>
 </body>
 </html>
-
