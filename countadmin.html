@@ -56,14 +56,7 @@
 
         window.togglePassword = () => {
             const pwd = document.getElementById('password');
-            const icon = document.getElementById('pwdIcon');
-            if (pwd.type === "password") {
-                pwd.type = "text";
-                icon.innerText = "🔒";
-            } else {
-                pwd.type = "password";
-                icon.innerText = "👁️";
-            }
+            pwd.type = pwd.type === "password" ? "text" : "password";
         };
 
         window.handleLogout = () => { if(confirm("Logout from Portal?")) signOut(auth); };
@@ -112,9 +105,13 @@
 
         function updateCartUI() {
             const container = document.getElementById('cartItems');
-            document.getElementById('cartTotal').innerText = cart.reduce((s,i) => s + i.price, 0);
+            const total = cart.reduce((s,i) => s + i.price, 0);
+            document.getElementById('cartTotal').innerText = total;
+            if (document.getElementById('cartTotalMobile')) {
+                document.getElementById('cartTotalMobile').innerText = total;
+            }
             container.innerHTML = cart.map((item, index) => `
-                <div class="flex justify-between items-center bg-white p-3 rounded-xl mb-3 border border-slate-100 shadow-sm">
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl mb-3 border border-slate-100 shadow-sm">
                     <div class="flex flex-col">
                         <span class="text-[9px] font-bold text-orange-600 uppercase tracking-tighter">${item.diety || item.deity}</span>
                         <span class="font-bold text-slate-700 text-sm">${item.name_en}</span>
@@ -160,68 +157,67 @@
 <body class="h-screen overflow-hidden flex flex-col">
 
     <div id="loginScreen" class="flex items-center justify-center min-h-screen bg-orange-50 p-4">
-        <div class="bg-white p-8 md:p-12 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl w-full max-w-sm border border-orange-100 text-center">
+        <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl w-full max-w-sm border border-orange-100 text-center">
             <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight mb-2">Portal Login</h2>
-            <p class="text-slate-400 text-[10px] mb-8 uppercase font-bold tracking-widest">Manikandapuram Sree Dharmasastha Temple</p>
-            <div class="space-y-4">
+            <div class="space-y-4 mt-6">
                 <input type="email" id="email" placeholder="Email Address" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none focus:border-orange-500 transition-all font-semibold">
                 <div class="relative">
                     <input type="password" id="password" placeholder="Password" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none focus:border-orange-500 transition-all font-semibold">
-                    <button type="button" onclick="togglePassword()" class="absolute right-4 top-4 text-slate-400 text-xl" id="pwdIcon">👁️</button>
+                    <button type="button" onclick="togglePassword()" class="absolute right-4 top-4 text-slate-400 text-xl">👁️</button>
                 </div>
-                <button onclick="login()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-orange-100 hover:bg-orange-700 transition-all">SIGN IN</button>
+                <button onclick="login()" class="w-full bg-orange-600 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-orange-700 transition-all">SIGN IN</button>
             </div>
         </div>
     </div>
 
     <div id="appScreen" class="hidden flex flex-col h-screen no-print overflow-hidden">
-        <header class="bg-white border-b border-slate-100 py-4 md:py-6 flex justify-between items-center px-4 md:px-10 shrink-0">
+        <header class="bg-white border-b border-slate-100 py-3 md:py-6 flex justify-between items-center px-4 md:px-10 shrink-0">
             <div class="flex items-center gap-2 md:gap-4">
-                <div class="w-8 h-8 md:w-12 md:h-12 bg-orange-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-bold text-[10px] md:text-sm shadow-lg shadow-orange-100">MSDT</div>
-                <h1 class="font-black text-slate-900 uppercase text-[8px] md:text-lg tracking-tight line-clamp-2 md:line-clamp-none">Manikandapuram Sree Dharmasastha Temple Billing & Management Portal</h1>
+                <div class="w-8 h-8 md:w-12 md:h-12 bg-orange-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-bold text-[10px] md:text-sm">MSDT</div>
+                <h1 class="font-black text-slate-900 uppercase text-[8px] md:text-lg tracking-tight">Manikandapuram Temple Billing & Management</h1>
             </div>
-            <div class="flex items-center gap-2 md:gap-4">
+            <div class="flex items-center gap-2">
                 <span id="currentUser" class="hidden md:inline text-slate-500 font-bold text-xs"></span>
-                <button onclick="handleLogout()" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white font-bold text-[8px] md:text-[10px] uppercase tracking-widest border border-red-200 px-3 md:px-5 py-1.5 md:py-2 rounded-full transition-all">Logout</button>
+                <button onclick="handleLogout()" class="bg-red-50 text-red-600 font-bold text-[8px] md:text-[10px] uppercase border border-red-200 px-3 md:px-5 py-1.5 rounded-full">Logout</button>
             </div>
         </header>
 
         <main class="flex flex-1 flex-col md:flex-row overflow-hidden">
-            <div class="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 md:space-y-8 bg-[#fafafb] custom-scroll">
-                <div class="bg-white p-4 md:p-8 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4 md:gap-8">
+            <div class="flex-1 p-4 md:p-10 overflow-y-auto space-y-6 bg-[#fafafb] custom-scroll">
+                <div class="bg-white p-4 md:p-8 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4">
                     <div class="flex-[2] space-y-2">
-                        <label class="text-[9px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Devotee Name</label>
-                        <input type="text" id="devoteeName" oninput="updateNameAndFetchML(this.value)" placeholder="Enter name in English..." class="w-full bg-slate-50 border border-transparent p-3 md:p-4 rounded-xl md:rounded-2xl focus:bg-white focus:border-orange-500 outline-none transition-all font-bold text-slate-700 text-sm md:text-base">
+                        <label class="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Devotee Name</label>
+                        <input type="text" id="devoteeName" oninput="updateNameAndFetchML(this.value)" placeholder="Name..." class="w-full bg-slate-50 border border-transparent p-3 rounded-xl focus:bg-white focus:border-orange-500 outline-none font-bold text-slate-700">
                     </div>
                     <div class="flex-1 space-y-2">
-                        <label class="text-[9px] md:text-[10px] font-black text-slate-300 uppercase tracking-widest ml-1">Nakshatram</label>
-                        <select id="devoteeStar" class="w-full bg-slate-50 border border-transparent p-3 md:p-4 rounded-xl md:rounded-2xl outline-none focus:bg-white focus:border-orange-500 transition-all font-bold text-slate-700 text-sm md:text-base">
+                        <label class="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Nakshatram</label>
+                        <select id="devoteeStar" class="w-full bg-slate-50 border border-transparent p-3 rounded-xl outline-none focus:bg-white focus:border-orange-500 font-bold text-slate-700">
                             <option>Ashwati / അശ്വതി</option><option>Bharani / ഭരണി</option><option>Kartika / കാർത്തിക</option><option>Rohini / രോഹിണി</option><option>Makayiram / മകയിരം</option><option>Thiruvathira / തിരുവാതിര</option><option>Punartham / പുണർതം</option><option>Pooyam / പൂയം</option><option>Ayilyam / ആയില്യം</option><option>Makam / മകം</option><option>Pooram / പൂരം</option><option>Uthram / ഉത്രം</option><option>Atham / അത്തം</option><option>Chitra / ചിത്ര</option><option>Chothi / ചോതി</option><option>Vishakham / വിശാഖം</option><option>Anizham / അനിഴം</option><option>Thrikketta / തൃക്കേട്ട</option><option>Moolam / മൂലം</option><option>Pooradam / പൂരാടം</option><option>Uthradam / ഉത്രാടം</option><option>Thiruvonam / തിരുവോണം</option><option>Avittam / അവിട്ടം</option><option>Chathayam / ചതയം</option><option>Pooruruttathi / പൂരുരുട്ടാതി</option><option>Uthruttathi / ഉത്രട്ടാതി</option><option>Revathi / രേവതി</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="space-y-4 md:space-y-6">
-                    <div id="deityTabs" class="flex flex-nowrap md:flex-wrap gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide"></div>
-                    <div id="poojaCards" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4"></div>
-                </div>
+                <div id="deityTabs" class="flex overflow-x-auto gap-2 pb-2 scrollbar-hide"></div>
+                <div id="poojaCards" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"></div>
             </div>
 
-            <div class="w-full md:w-96 bg-white border-t md:border-t-0 md:border-l border-slate-100 flex flex-col p-4 md:p-8 shadow-sm shrink-0 h-1/3 md:h-auto overflow-hidden">
-                <div class="mb-2 md:mb-10 flex justify-between items-center md:block">
+            <div class="w-full md:w-96 bg-white border-t md:border-t-0 md:border-l border-slate-100 flex flex-col p-4 md:p-8 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] md:shadow-none shrink-0 z-20 h-[45%] md:h-auto">
+                <div class="flex justify-between items-center mb-4">
                     <div>
-                        <h3 class="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 md:mb-2">Checkout Bill</h3>
-                        <p id="cartDevoteeName" class="font-black text-slate-800 text-sm md:text-2xl truncate tracking-tight">Devotee Name</p>
+                        <h3 class="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest">Devotee Bill</h3>
+                        <p id="cartDevoteeName" class="font-black text-slate-800 text-sm md:text-2xl truncate">Devotee Name</p>
                     </div>
                     <div class="md:hidden text-orange-600 font-black text-lg">₹<span id="cartTotalMobile">0</span></div>
                 </div>
+                
                 <div class="flex-1 overflow-y-auto custom-scroll" id="cartItems"></div>
-                <div class="pt-4 md:pt-8 border-t border-slate-100 mt-2 md:mt-6">
+
+                <div class="pt-4 border-t border-slate-100 mt-2">
                     <div class="hidden md:flex justify-between items-end mb-6">
                         <span class="text-slate-300 text-[9px] font-black uppercase tracking-widest">Grand Total</span>
                         <span class="text-4xl font-black text-orange-600 leading-none">₹<span id="cartTotal">0</span></span>
                     </div>
-                    <button onclick="processBill()" class="w-full bg-slate-900 text-white font-black py-3 md:py-5 rounded-xl md:rounded-[1.5rem] shadow-xl hover:bg-black active:scale-[0.98] transition-all uppercase tracking-widest text-[9px] md:text-[10px]">Save & Print Receipt</button>
+                    <button onclick="processBill()" class="w-full bg-slate-900 text-white font-black py-4 md:py-5 rounded-xl md:rounded-[1.5rem] shadow-xl hover:bg-black active:scale-95 transition-all uppercase tracking-widest text-[10px]">Save & Print Receipt</button>
                 </div>
             </div>
         </main>
@@ -243,16 +239,5 @@
         <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px;"><span>TOTAL:</span><span>₹<span id="printTotal"></span></span></div>
         <div style="text-align: center; margin-top: 15px; font-size: 11px; font-weight: bold;">Swami Saranam</div>
     </div>
-
-    <script>
-        // Synchronize mobile/desktop totals
-        const observer = new MutationObserver((mutations) => {
-            const total = document.getElementById('cartTotal').innerText;
-            if (document.getElementById('cartTotalMobile')) {
-                document.getElementById('cartTotalMobile').innerText = total;
-            }
-        });
-        observer.observe(document.getElementById('cartTotal'), { characterData: true, childList: true, subtree: true });
-    </script>
 </body>
 </html>
