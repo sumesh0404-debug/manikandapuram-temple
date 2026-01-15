@@ -147,7 +147,7 @@
             localStorage.removeItem('temple_cart');
             autoMalayalamName = "";
             devoteeName.value = "";
-            cartDevoteeName.innerText = "Devotee Name"; // Sidebar reset fix
+            cartDevoteeName.innerText = "Devotee Name"; 
             updateCart();
             successOverlay.classList.add('hidden');
             if (!mobileCartOverlay.classList.contains('hidden')) toggleMobileCart();
@@ -172,56 +172,73 @@
                     items, total, timestamp: serverTimestamp()
                 });
 
-                const receipt = `
-                    <div style="width:58mm; font-family:monospace; padding:10px; color:black; background:white;">
-                        <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        <div style="font-size:12px;">
-                            <b>Name:</b> ${dName} / ${mName}<br>
-                            <b>Star:</b> ${dStar}<br>
-                            <b>Date:</b> ${new Date().toLocaleString('en-IN')}
-                        </div>
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        ${items.map((i, index) => `
-                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px; align-items: flex-start;">
-                                <div style="display:flex; gap:5px;">
-                                    <span>${index + 1}.</span>
-                                    <div>
-                                        <b>${i.name_en}</b><br>
-                                        <span style="font-size:10px;">${i.name_ml}</span>
+                const receiptHtml = `
+                    <html>
+                    <head>
+                        <style>
+                            body { margin: 0; padding: 20px; font-family: monospace; display: flex; justify-content: center; }
+                            .receipt { width: 58mm; color: black; background: white; }
+                            center { text-align: center; }
+                            .dash { border-top: 1px dashed #000; margin: 10px 0; }
+                            .flex { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; }
+                        </style>
+                    </head>
+                    <body onload="window.print();">
+                        <div class="receipt">
+                            <center><b style="font-size:14px;">MANIKANDAPURAM SREE<br>DHARMASASTHA TEMPLE</b><br><small>Paravoor, Panapuzha - 670306</small></center>
+                            <div class="dash"></div>
+                            <div style="font-size:12px;">
+                                <b>Name:</b> ${dName} / ${mName}<br>
+                                <b>Star:</b> ${dStar}<br>
+                                <b>Date:</b> ${new Date().toLocaleString('en-IN')}
+                            </div>
+                            <div class="dash"></div>
+                            ${items.map((i, index) => `
+                                <div class="flex">
+                                    <div style="display:flex; gap:5px;">
+                                        <span>${index + 1}.</span>
+                                        <div><b>${i.name_en}</b><br><span style="font-size:10px;">${i.name_ml}</span></div>
                                     </div>
-                                </div>
-                                <b>₹${i.price}</b>
-                            </div>`).join("")}
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
-                            <span>TOTAL:</span><span>₹${total}</span>
+                                    <b>₹${i.price}</b>
+                                </div>`).join("")}
+                            <div class="dash"></div>
+                            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
+                                <span>TOTAL:</span><span>₹${total}</span>
+                            </div>
+                            <div class="dash"></div>
+                            <center><br><b>Swami Saranam</b></center>
                         </div>
-                        <div style="border-top:1px dashed #000; margin:10px 0;"></div>
-                        <center><br><b>Swami Saranam</b></center>
-                    </div>`;
+                    </body>
+                    </html>`;
 
-                // Hardened Print Iframe
-                const frame = document.createElement("iframe");
-                frame.style.position = "fixed"; frame.style.top = "0"; frame.style.left = "0";
-                frame.style.width = "100%"; frame.style.height = "100%";
-                frame.style.zIndex = "9999"; frame.style.background = "white"; frame.style.border = "none";
-                document.body.appendChild(frame);
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-                const frameDoc = frame.contentDocument || frame.contentWindow.document;
-                frameDoc.open();
-                frameDoc.write(`<html><body style="margin:0; display:flex; justify-content:center; padding-top:20px;">${receipt}</body></html>`);
-                frameDoc.close();
+                if (isMobile) {
+                    const printWin = window.open('', '_blank');
+                    printWin.document.write(receiptHtml);
+                    printWin.document.close();
+                    successOverlay.classList.remove('hidden');
+                } else {
+                    const frame = document.createElement("iframe");
+                    frame.style.position = "fixed"; frame.style.top = "0"; frame.style.left = "0";
+                    frame.style.width = "100%"; frame.style.height = "100%";
+                    frame.style.zIndex = "9999"; frame.style.background = "white"; frame.style.border = "none";
+                    document.body.appendChild(frame);
 
-                setTimeout(() => {
-                    frame.contentWindow.focus();
-                    frame.contentWindow.print();
-                    
+                    const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                    frameDoc.open();
+                    frameDoc.write(receiptHtml);
+                    frameDoc.close();
+
                     setTimeout(() => {
-                        if (document.body.contains(frame)) document.body.removeChild(frame);
-                        successOverlay.classList.remove('hidden');
-                    }, 1500);
-                }, 800);
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                        setTimeout(() => {
+                            if (document.body.contains(frame)) document.body.removeChild(frame);
+                            successOverlay.classList.remove('hidden');
+                        }, 1500);
+                    }, 800);
+                }
 
             } catch (err) {
                 alert("Error: " + err.message);
